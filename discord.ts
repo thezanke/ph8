@@ -95,15 +95,48 @@ export class DiscordClient extends EventTarget {
     this.connect();
   }
 
-  handleOpen() {
+  private handleSocketOpen(e: Event) {
+    const event = new CustomEvent("OPEN");
+    this.dispatchEvent(event);
+  }
+
+  private handleSocketClose(e: CloseEvent) {
+    const { code } = e;
+    const event = new CustomEvent("CLOSE", { detail: { code } });
+    this.dispatchEvent(event);
+  }
+
+  private handleSocketMessage(e: MessageEvent) {
+    logger.debug(`Receive Message:\n${e.data}`);
+    const detail = parseMessageData(e.data);
+    const event = new CustomEvent("MESSAGE", { detail });
+    this.dispatchEvent(event);
+  }
+
+  private handleSocketError(e: Event | ErrorEvent) {
+    const init = {} as CustomEventInit;
+    if (e instanceof ErrorEvent) {
+      init.detail = e.message;
+    }
+    const event = new CustomEvent("CLOSE", init);
+    this.dispatchEvent(event);
+  }
+
+  private handleOpen() {
     this.connected = true;
     logger.debug("Connected to socket.");
   }
 
-  handleError() {
+  private handleClose() {
+    this.connected = false;
+    this.socket = undefined;
+
+    this.stopHeartbeat();
+
+    logger.debug("Socket closed.");
   }
 
-  handleMessage(e: CustomEvent) {
+  private handleMessage(e: CustomEvent) {
     const message = e.detail as DiscordMessage;
 
     if (message.seq) {
@@ -126,43 +159,53 @@ export class DiscordClient extends EventTarget {
     }
   }
 
-  handleClose() {
-    this.connected = false;
-    this.socket = undefined;
-
-    this.stopHeartbeat();
-
-    logger.debug("Socket closed.");
+  private handleError() {
   }
 
-  handleSocketOpen(e: Event) {
-    const event = new CustomEvent("OPEN");
-    this.dispatchEvent(event);
-  }
-
-  handleSocketClose(e: CloseEvent) {
-    const { code } = e;
-    const event = new CustomEvent("CLOSE", { detail: { code } });
-    this.dispatchEvent(event);
-  }
-
-  handleSocketMessage(e: MessageEvent) {
-    logger.debug(`Receive Message:\n${e.data}`);
-    const detail = parseMessageData(e.data);
-    const event = new CustomEvent("MESSAGE", { detail });
-    this.dispatchEvent(event);
-  }
-
-  handleSocketError(e: Event | ErrorEvent) {
-    const init = {} as CustomEventInit;
-    if (e instanceof ErrorEvent) {
-      init.detail = e.message;
+  private sendMessage(message: DiscordMessage) {
+    if (!this.socket) {
+      throw new Error("Socket not connected.");
     }
-    const event = new CustomEvent("CLOSE", init);
-    this.dispatchEvent(event);
+
+    const payload = createMessagePayload(message);
+    logger.debug(`Send Message:\n${payload}`);
+
+    this.socket.send(payload);
   }
 
-  async connect() {
+  private heartbeatOperation() {
+    if (this.ackRequired) {
+      throw new Error("Resume required.");
+    }
+
+    this.sendMessage({ op: OpCode.HEARTBEAT, data: this.lastSeq });
+    this.ackRequired = true;
+  }
+
+  private identifyOperation() {
+    this.sendMessage({
+      op: OpCode.IDENTIFY,
+      data: {
+        token: config.BOT_TOKEN,
+        properties: { $os: "Linux", $browser: "ph8", $device: "ph8" },
+      },
+    });
+  }
+
+  private startHeartbeat(interval: number) {
+    this.heartbeatId = setInterval(
+      this.heartbeatOperation.bind(this),
+      interval,
+    );
+  }
+
+  private stopHeartbeat() {
+    clearInterval(this.heartbeatId);
+    delete this.heartbeatId;
+    this.ackRequired = false;
+  }
+
+  public async connect() {
     const { url, shards } = await getBotGatewayDetails();
 
     if (shards > 1) {
@@ -176,48 +219,5 @@ export class DiscordClient extends EventTarget {
     socket.onerror = this.handleSocketError.bind(this);
 
     this.socket = socket;
-  }
-
-  sendMessage(message: DiscordMessage) {
-    if (!this.socket) {
-      throw new Error("Socket not connected.");
-    }
-
-    const payload = createMessagePayload(message);
-    logger.debug(`Send Message:\n${payload}`);
-
-    this.socket.send(payload);
-  }
-
-  heartbeatOperation() {
-    if (this.ackRequired) {
-      throw new Error("Resume required.");
-    }
-
-    this.sendMessage({ op: OpCode.HEARTBEAT, data: this.lastSeq });
-    this.ackRequired = true;
-  }
-
-  identifyOperation() {
-    this.sendMessage({
-      op: OpCode.IDENTIFY,
-      data: {
-        token: config.BOT_TOKEN,
-        properties: { $os: "Linux", $browser: "ph8", $device: "ph8" },
-      },
-    });
-  }
-
-  startHeartbeat(interval: number) {
-    this.heartbeatId = setInterval(
-      this.heartbeatOperation.bind(this),
-      interval,
-    );
-  }
-
-  stopHeartbeat() {
-    clearInterval(this.heartbeatId);
-    delete this.heartbeatId;
-    this.ackRequired = false;
   }
 }
