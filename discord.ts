@@ -1,6 +1,8 @@
 // @deno-types="https://unpkg.com/ky/index.d.ts"
 import ky from "https://unpkg.com/ky/index.js";
+import * as log from "https://deno.land/std/log/mod.ts";
 import config from "./config.ts";
+import logger from "./logger.ts";
 
 const API_VERSION = 6;
 const BASE_AP_URL = `https://discord.com/api/v${API_VERSION}`;
@@ -95,7 +97,7 @@ export class DiscordClient extends EventTarget {
 
   handleOpen() {
     this.connected = true;
-    console.debug("Connected to socket.");
+    logger.debug("Connected to socket.");
   }
 
   handleError() {
@@ -118,8 +120,8 @@ export class DiscordClient extends EventTarget {
     }
 
     if (message.op === OpCode.DISPATCH && message.eventName) {
-      const { eventName, data } = message;
-      const event = new CustomEvent(`DISPATCH:${eventName}`, { detail: { data } });
+      const { eventName, data: detail } = message;
+      const event = new CustomEvent(`@${eventName}`, { detail });
       this.dispatchEvent(event);
     }
   }
@@ -130,7 +132,7 @@ export class DiscordClient extends EventTarget {
 
     this.stopHeartbeat();
 
-    console.debug("Socket closed.");
+    logger.debug("Socket closed.");
   }
 
   handleSocketOpen(e: Event) {
@@ -145,7 +147,7 @@ export class DiscordClient extends EventTarget {
   }
 
   handleSocketMessage(e: MessageEvent) {
-    console.debug(`🔻 RECEIVE: ${e.data}`);
+    logger.debug(`Receive Message:\n${e.data}`);
     const detail = parseMessageData(e.data);
     const event = new CustomEvent("MESSAGE", { detail });
     this.dispatchEvent(event);
@@ -164,7 +166,7 @@ export class DiscordClient extends EventTarget {
     const { url, shards } = await getBotGatewayDetails();
 
     if (shards > 1) {
-      console.warn("Discord is suggesting more than one shard ...");
+      logger.warning("Discord is suggesting more than one shard ...");
     }
 
     const socket = new WebSocket(`${url}?v=${API_VERSION}`);
@@ -182,7 +184,7 @@ export class DiscordClient extends EventTarget {
     }
 
     const payload = createMessagePayload(message);
-    console.debug(`🔺 SEND: ${payload}`);
+    logger.debug(`Send Message:\n${payload}`);
 
     this.socket.send(payload);
   }

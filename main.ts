@@ -1,6 +1,6 @@
 import config from "./config.ts";
 import httpServer from "./httpServer.ts";
-import { getBotGatewayDetails, DiscordClient } from "./discord.ts";
+import { DiscordClient } from "./discord.ts";
 
 const discordClient = new DiscordClient();
 
