@@ -86,45 +86,27 @@ export class DiscordClient extends EventTarget {
   constructor() {
     super();
 
-    this.addEventListener("OPEN", this.handleOpen as EventListener);
-    this.addEventListener("ERROR", this.handleError as EventListener);
+    this.addEventListener("OPEN", this.handleOpen);
+    this.addEventListener("ERROR", this.handleError);
     this.addEventListener("MESSAGE", this.handleMessage as EventListener);
-    this.addEventListener("CLOSE", this.handleClose as EventListener);
+    this.addEventListener("CLOSE", this.handleClose);
+
+    this.addEventListener(
+      "@MESSAGE_CREATE",
+      ((e: CustomEvent) => {
+        logger.info('message')
+        console.log(e.detail);
+      }) as EventListener,
+    );
+    this.addEventListener(
+      "@TYPING_START",
+      ((e: CustomEvent) => {
+        logger.info('typing')
+        console.log(e.detail);
+      }) as EventListener,
+    );
 
     this.connect();
-  }
-
-  private createSocket(url: string) {
-    const socket = new WebSocket(`${url}?v=${API_VERSION}`);
-
-    socket.onopen = (e: Event) => {
-      const event = new CustomEvent("OPEN");
-      this.dispatchEvent(event);
-    };
-
-    socket.onclose = (e: CloseEvent) => {
-      const { code } = e;
-      const event = new CustomEvent("CLOSE", { detail: { code } });
-      this.dispatchEvent(event);
-    };
-
-    socket.onmessage = (e: MessageEvent) => {
-      logger.debug(`Receive Message:\n${e.data}`);
-      const detail = parseMessageData(e.data);
-      const event = new CustomEvent("MESSAGE", { detail });
-      this.dispatchEvent(event);
-    };
-
-    socket.onerror = (e: Event | ErrorEvent) => {
-      const init = {} as CustomEventInit;
-      if (e instanceof ErrorEvent) {
-        init.detail = e.message;
-      }
-      const event = new CustomEvent("CLOSE", init);
-      this.dispatchEvent(event);
-    };
-
-    return socket;
   }
 
   private handleOpen() {
@@ -167,7 +149,7 @@ export class DiscordClient extends EventTarget {
   private handleError() {
   }
 
-  private sendMessage(message: DiscordMessage) {
+  public sendMessage(message: DiscordMessage) {
     if (!this.socket) {
       throw new Error("Socket not connected.");
     }
@@ -208,6 +190,39 @@ export class DiscordClient extends EventTarget {
     clearInterval(this.heartbeatId);
     delete this.heartbeatId;
     this.ackRequired = false;
+  }
+
+  private createSocket(url: string) {
+    const socket = new WebSocket(`${url}?v=${API_VERSION}`);
+
+    socket.onopen = (e: Event) => {
+      const event = new CustomEvent("GATEWAY_OPEN");
+      this.dispatchEvent(event);
+    };
+
+    socket.onclose = (e: CloseEvent) => {
+      const { code } = e;
+      const event = new CustomEvent("CLOSE", { detail: { code } });
+      this.dispatchEvent(event);
+    };
+
+    socket.onmessage = (e: MessageEvent) => {
+      logger.debug(`Receive Message:\n${e.data}`);
+      const detail = parseMessageData(e.data);
+      const event = new CustomEvent("MESSAGE", { detail });
+      this.dispatchEvent(event);
+    };
+
+    socket.onerror = (e: Event | ErrorEvent) => {
+      const init = {} as CustomEventInit;
+      if (e instanceof ErrorEvent) {
+        init.detail = e.message;
+      }
+      const event = new CustomEvent("CLOSE", init);
+      this.dispatchEvent(event);
+    };
+
+    return socket;
   }
 
   public async connect() {
