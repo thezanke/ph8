@@ -1,6 +1,5 @@
 // @deno-types="https://unpkg.com/ky/index.d.ts"
 import ky from "https://unpkg.com/ky/index.js";
-import * as log from "https://deno.land/std/log/mod.ts";
 import config from "./config.ts";
 import logger from "./logger.ts";
 
