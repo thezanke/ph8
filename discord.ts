@@ -95,31 +95,37 @@ export class DiscordClient extends EventTarget {
     this.connect();
   }
 
-  private handleSocketOpen(e: Event) {
-    const event = new CustomEvent("OPEN");
-    this.dispatchEvent(event);
-  }
+  private createSocket(url: string) {
+    const socket = new WebSocket(`${url}?v=${API_VERSION}`);
 
-  private handleSocketClose(e: CloseEvent) {
-    const { code } = e;
-    const event = new CustomEvent("CLOSE", { detail: { code } });
-    this.dispatchEvent(event);
-  }
+    socket.onopen = (e: Event) => {
+      const event = new CustomEvent("OPEN");
+      this.dispatchEvent(event);
+    };
 
-  private handleSocketMessage(e: MessageEvent) {
-    logger.debug(`Receive Message:\n${e.data}`);
-    const detail = parseMessageData(e.data);
-    const event = new CustomEvent("MESSAGE", { detail });
-    this.dispatchEvent(event);
-  }
+    socket.onclose = (e: CloseEvent) => {
+      const { code } = e;
+      const event = new CustomEvent("CLOSE", { detail: { code } });
+      this.dispatchEvent(event);
+    };
 
-  private handleSocketError(e: Event | ErrorEvent) {
-    const init = {} as CustomEventInit;
-    if (e instanceof ErrorEvent) {
-      init.detail = e.message;
-    }
-    const event = new CustomEvent("CLOSE", init);
-    this.dispatchEvent(event);
+    socket.onmessage = (e: MessageEvent) => {
+      logger.debug(`Receive Message:\n${e.data}`);
+      const detail = parseMessageData(e.data);
+      const event = new CustomEvent("MESSAGE", { detail });
+      this.dispatchEvent(event);
+    };
+
+    socket.onerror = (e: Event | ErrorEvent) => {
+      const init = {} as CustomEventInit;
+      if (e instanceof ErrorEvent) {
+        init.detail = e.message;
+      }
+      const event = new CustomEvent("CLOSE", init);
+      this.dispatchEvent(event);
+    };
+
+    return socket;
   }
 
   private handleOpen() {
@@ -212,12 +218,6 @@ export class DiscordClient extends EventTarget {
       logger.warning("Discord is suggesting more than one shard ...");
     }
 
-    const socket = new WebSocket(`${url}?v=${API_VERSION}`);
-    socket.onopen = this.handleSocketOpen.bind(this);
-    socket.onclose = this.handleSocketClose.bind(this);
-    socket.onmessage = this.handleSocketMessage.bind(this);
-    socket.onerror = this.handleSocketError.bind(this);
-
-    this.socket = socket;
+    this.socket = this.createSocket(url);
   }
 }
