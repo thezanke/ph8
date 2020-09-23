@@ -4,9 +4,9 @@ import config from "./config.ts";
 import logger from "./logger.ts";
 
 const API_VERSION = 6;
-const BASE_AP_URL = `https://discord.com/api/v${API_VERSION}`;
+const BASE_API_URL = `https://discord.com/api/v${API_VERSION}`;
 
-enum OpCode {
+const enum OpCode {
   DISPATCH,
   HEARTBEAT,
   IDENTIFY,
@@ -19,6 +19,24 @@ enum OpCode {
   INVALID_SESSION,
   HELLO,
   HEARTBEAT_ACK,
+}
+
+const enum SocketEvent {
+  OPEN = "open",
+  CLOSE = "close",
+  MESSAGE = "message",
+  ERROR = "error",
+}
+
+enum DiscordEvent {
+  READY = "@READY",
+  TYPING_START = "@TYPING_START",
+  GUILD_CREATE = "@GUILD_CREATE",
+  CHANNEL_CREATE = "@CHANNEL_CREATE",
+  MESSAGE_CREATE = "@MESSAGE_CREATE",
+  MESSAGE_UPDATE = "@MESSAGE_UPDATE",
+  MESSAGE_DELETE = "@MESSAGE_DELETE",
+  PRESENCE_UPDATE = "@PRESENCE_UPDATE",
 }
 
 interface gatewayDetailsResponse {
@@ -46,9 +64,22 @@ interface DiscordMessage {
   seq?: number;
 }
 
+const logged = new Set();
+
+const logEventName = (eventName: string) => {
+  if (
+    // @ts-ignore
+    logged.has(eventName) || Object.values(DiscordEvent).includes(eventName)
+  ) {
+    return;
+  }
+  logger.info(`New Discord event detected: ${eventName}`);
+  logged.add(eventName);
+};
+
 export const getBotGatewayDetails = async () => {
   const res = await ky.get(
-    `${BASE_AP_URL}/gateway/bot`,
+    `${BASE_API_URL}/gateway/bot`,
     { headers: { Authorization: `Bot ${config.BOT_TOKEN}` } },
   ).json();
 
@@ -75,52 +106,82 @@ const createMessagePayload = (message: DiscordMessage) => {
   return JSON.stringify(raw);
 };
 
+const ADD_BOT_URL = (
+  `${BASE_API_URL}/oauth2/authorize?client_id=${config.CLIENT_ID}&scope=bot&permissions=8`
+);
+
 export class DiscordClient extends EventTarget {
-  connected = false;
+  public connected = false;
+  public user?: any;
+  public connecting = false;
 
   private ackRequired = false;
   private heartbeatId?: number;
   private lastSeq?: number;
   private socket?: WebSocket;
+  private sessionId?: string;
+  private reconnect = true;
+  private resumeAttempts = 0;
 
   constructor() {
     super();
-
-    this.addEventListener("OPEN", this.handleOpen);
-    this.addEventListener("ERROR", this.handleError);
-    this.addEventListener("MESSAGE", this.handleMessage as EventListener);
-    this.addEventListener("CLOSE", this.handleClose);
-
-    this.addEventListener(
-      "@MESSAGE_CREATE",
-      ((e: CustomEvent) => {
-        logger.info('message')
-        console.log(e.detail);
-      }) as EventListener,
-    );
-    this.addEventListener(
-      "@TYPING_START",
-      ((e: CustomEvent) => {
-        logger.info('typing')
-        console.log(e.detail);
-      }) as EventListener,
-    );
-
+    this.attachDefaultListeners();
     this.connect();
+  }
+
+  attachDefaultListeners() {
+    this.addEventListener(SocketEvent.OPEN, this.handleOpen);
+    this.addEventListener(SocketEvent.ERROR, this.handleError);
+    this.addEventListener(
+      SocketEvent.MESSAGE,
+      this.handleMessage as EventListener,
+    );
+    this.addEventListener(SocketEvent.CLOSE, this.handleClose);
+    this.addEventListener(
+      DiscordEvent.READY,
+      this.handleReady as EventListener,
+    );
+    this.addEventListener(
+      DiscordEvent.MESSAGE_CREATE,
+      ((e: CustomEvent) => {
+        logger.info("message");
+        console.log(e.detail);
+      }) as EventListener,
+    );
+    this.addEventListener(
+      DiscordEvent.TYPING_START,
+      ((e: CustomEvent) => {
+        logger.info("typing");
+        console.log(e.detail);
+      }) as EventListener,
+    );
   }
 
   private handleOpen() {
     this.connected = true;
-    logger.debug("Connected to socket.");
+    logger.info("Opening connection to Discord gateway ...");
+    logger.info(`${ADD_BOT_URL}`);
   }
 
   private handleClose() {
     this.connected = false;
     this.socket = undefined;
 
-    this.stopHeartbeat();
+    if (this.heartbeatId) this.stopHeartbeat();
+    if (this.reconnect) this.connect();
 
-    logger.debug("Socket closed.");
+    logger.info("Discord gateway connection closed.");
+  }
+
+  identifyOrResume() {
+    if (this.sessionId && this.lastSeq) {
+      logger.info("Attemping to resume Discord gateway session ...");
+      this.resumeOperation();
+      // try resuming
+    } else {
+      logger.info("Identifying with Discord gateway ...")
+      this.identifyOperation();
+    }
   }
 
   private handleMessage(e: CustomEvent) {
@@ -132,21 +193,33 @@ export class DiscordClient extends EventTarget {
 
     if (message.op === OpCode.HELLO) {
       this.startHeartbeat(message.data.heartbeat_interval);
-      this.identifyOperation();
+      this.identifyOrResume();
     }
 
     if (message.op === OpCode.HEARTBEAT_ACK) {
+      logger.info("Heartbeat acknowledged.");
       this.ackRequired = false;
     }
 
     if (message.op === OpCode.DISPATCH && message.eventName) {
       const { eventName, data: detail } = message;
-      const event = new CustomEvent(`@${eventName}`, { detail });
+      const newEventName = `@${eventName}`;
+      logEventName(newEventName);
+      const event = new CustomEvent(newEventName, { detail });
       this.dispatchEvent(event);
     }
   }
 
-  private handleError() {
+  private handleError(e: Event) {
+    console.log(e);
+  }
+
+  private handleReady(e: CustomEvent) {
+    const { detail } = e;
+    logger.info("Discord gateway session ready!");
+    console.log(detail);
+    this.sessionId = detail.session_id;
+    this.user = detail.user;
   }
 
   public sendMessage(message: DiscordMessage) {
@@ -161,12 +234,28 @@ export class DiscordClient extends EventTarget {
   }
 
   private heartbeatOperation() {
-    if (this.ackRequired) {
-      throw new Error("Resume required.");
+    if (!this.ackRequired) {
+      logger.info("Sending heartbeat ...")
+      this.sendMessage({ op: OpCode.HEARTBEAT, data: this.lastSeq });
+      this.ackRequired = true;
+    } else {
+      logger.info("Heartbeat failed, closing socket.");
+      this.stopHeartbeat();
+      this.socket?.close();
     }
+  }
 
-    this.sendMessage({ op: OpCode.HEARTBEAT, data: this.lastSeq });
-    this.ackRequired = true;
+  private resumeOperation() {
+    this.sendMessage({
+      op: OpCode.RESUME,
+      data: {
+        token: config.BOT_TOKEN,
+        session_id: this.sessionId,
+        seq: this.lastSeq,
+      },
+    });
+
+    this.resumeAttempts += 1;
   }
 
   private identifyOperation() {
@@ -187,38 +276,37 @@ export class DiscordClient extends EventTarget {
   }
 
   private stopHeartbeat() {
-    clearInterval(this.heartbeatId);
-    delete this.heartbeatId;
-    this.ackRequired = false;
+    if (this.heartbeatId) {
+      clearInterval(this.heartbeatId);
+      delete this.heartbeatId;
+      this.ackRequired = false;
+    }
   }
 
   private createSocket(url: string) {
     const socket = new WebSocket(`${url}?v=${API_VERSION}`);
 
     socket.onopen = (e: Event) => {
-      const event = new CustomEvent("GATEWAY_OPEN");
+      const event = new CustomEvent(SocketEvent.OPEN);
       this.dispatchEvent(event);
     };
 
     socket.onclose = (e: CloseEvent) => {
       const { code } = e;
-      const event = new CustomEvent("CLOSE", { detail: { code } });
+      const event = new CustomEvent(SocketEvent.CLOSE, { detail: { code } });
       this.dispatchEvent(event);
     };
 
     socket.onmessage = (e: MessageEvent) => {
       logger.debug(`Receive Message:\n${e.data}`);
       const detail = parseMessageData(e.data);
-      const event = new CustomEvent("MESSAGE", { detail });
+      const event = new CustomEvent(SocketEvent.MESSAGE, { detail });
       this.dispatchEvent(event);
     };
 
     socket.onerror = (e: Event | ErrorEvent) => {
-      const init = {} as CustomEventInit;
-      if (e instanceof ErrorEvent) {
-        init.detail = e.message;
-      }
-      const event = new CustomEvent("CLOSE", init);
+      console.log(e);
+      const event = new CustomEvent(SocketEvent.ERROR, e);
       this.dispatchEvent(event);
     };
 
@@ -233,5 +321,6 @@ export class DiscordClient extends EventTarget {
     }
 
     this.socket = this.createSocket(url);
+    this.connecting = true;
   }
 }
