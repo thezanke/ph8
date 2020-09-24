@@ -39,7 +39,7 @@ enum DiscordEvent {
   PRESENCE_UPDATE = "@PRESENCE_UPDATE",
 }
 
-interface gatewayDetailsResponse {
+interface GatewayDetailsResponse {
   url: string;
   shards: number;
   session_start_limit: {
@@ -83,7 +83,7 @@ export const getBotGatewayDetails = async () => {
     { headers: { Authorization: `Bot ${config.BOT_TOKEN}` } },
   ).json();
 
-  return res as gatewayDetailsResponse;
+  return res as GatewayDetailsResponse;
 };
 
 const parseMessageData = (messageString: string): DiscordMessage => {
