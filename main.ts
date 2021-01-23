@@ -62,7 +62,7 @@ const handleScoreReactions: ReactionHandler = (
 
   if (newScore < 0) newScore = 0;
 
-  scores[messageAuthorID] = lastScore + value;
+  scores[messageAuthorID] = newScore;
   console.log(scores);
 };
 
