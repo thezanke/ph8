@@ -26,4 +26,4 @@ deno run --allow-net --inspect main.ts
 
 # Debugging
 
-If you are using VSCode the project includes a configuration for attaching to a running debugger; you should simply be able to push F5 while the bot is running using the command above.
+If you are using VSCode, the project includes a configuration for attaching to a running debugger; you should simply be able to push F5 while the bot is running using the command above.
