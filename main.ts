@@ -66,7 +66,7 @@ const handleScoreReactions: ReactionHandler = (
   console.log(scores);
 };
 
-const BOT_TRIGGER = "ph8, ";
+const BOT_TRIGGER = "ph8";
 
 const commandHandlers: {
   [command: string]: (
@@ -76,7 +76,9 @@ const commandHandlers: {
 } = {
   help(message, topic) {
     if (!topic) {
-      message.reply(["Topics: scoring", 'Say "ph8, help [topic]"'].join("\n"));
+      message.reply(
+        ["Topics: `scoring`.", `Say "${BOT_TRIGGER}, help [topic]".`].join("\n")
+      );
       return;
     }
 
@@ -91,8 +93,8 @@ const commandHandlers: {
               (emoji) => `${emoji} == ${SCORE_MAP[emoji]}`
             ),
             "",
-            'You can retrieve your score by saying "ph8, my score".',
-            'You can retrieve other users\' scores by saying "ph8, score @username".',
+            `You can retrieve your score by saying "${BOT_TRIGGER}, my score".`,
+            `You can retrieve other users\' scores by saying "${BOT_TRIGGER}, score @username".`,
           ].join("\n")
         );
         break;
@@ -122,9 +124,7 @@ const commandHandlers: {
 const handleCommandMessages = (message: Message) => {
   if (!message.content.startsWith(BOT_TRIGGER)) return;
 
-  const [command, ...args] = message.content
-    .slice(BOT_TRIGGER.length)
-    .split(" ");
+  const [, command, ...args] = message.content.split(" ");
 
   console.log(command, args);
 
