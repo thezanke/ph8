@@ -26,7 +26,7 @@ try {
   Object.assign(scores, savedScores);
 } catch {}
 
-const SCORE_MAP: { [emojiName: string]: number | undefined } = {
+const REACTION_SCORES: { [emojiName: string]: number | undefined } = {
   "1️⃣": 1,
   "2️⃣": 2,
   "3️⃣": 3,
@@ -37,14 +37,15 @@ const SCORE_MAP: { [emojiName: string]: number | undefined } = {
   "8️⃣": 8,
   "9️⃣": 9,
   "🔟": 10,
-  "🏆": 50,
+  "💯": 5,
+  "🏆": 10,
   "👍": 1,
   "👎": -1,
   "💩": -5,
 };
 
 const getReactionValue = (emojiName?: string | null) =>
-  emojiName && emojiName.length && SCORE_MAP[emojiName];
+  emojiName && emojiName.length && REACTION_SCORES[emojiName];
 
 const handleScoreReactions: ReactionHandler = (
   _p,
@@ -92,8 +93,8 @@ const commandHandlers: {
             "You can react to messages with certain emoji to add or subtract from a users score.",
             "",
             "Reactions and their values: ",
-            ...Object.keys(SCORE_MAP).map(
-              (emoji) => `${emoji} == ${SCORE_MAP[emoji]}`
+            ...Object.keys(REACTION_SCORES).map(
+              (emoji) => `${emoji} == ${REACTION_SCORES[emoji]}`
             ),
             "",
             `You can retrieve your score by saying "${BOT_TRIGGER}, my score".`,
