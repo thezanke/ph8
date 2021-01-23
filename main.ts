@@ -42,7 +42,7 @@ const getReactionValue = (emojiName?: string | null) =>
 const handleScoreReactions: ReactionHandler = (
   _p,
   emoji,
-  _u,
+  userID,
   message,
   remove = false
 ) => {
@@ -51,22 +51,18 @@ const handleScoreReactions: ReactionHandler = (
   let value = getReactionValue(emoji.name);
   if (!value) return;
 
-  const userID = message.author.id;
-  if (!userID) return;
+  const messageAuthorID = message.author.id;
+  if (!messageAuthorID || messageAuthorID === userID) return;
 
   if (remove) value *= -1;
 
-  let lastScore = scores[userID] ?? 0;
+  let lastScore = scores[messageAuthorID] ?? 0;
   let newScore = lastScore + value;
 
   if (newScore < 0) newScore = 0;
 
-  scores[userID] = lastScore + value;
+  scores[messageAuthorID] = lastScore + value;
   console.log(scores);
-};
-
-const handleScoreQuery = (message: Message) => {
-  console.log(message);
 };
 
 const BOT_TRIGGER = "ph8, ";
@@ -77,6 +73,12 @@ const commandHandlers: {
   help(message) {
     message.reply("hahahahaha");
   },
+  my(message, subCommand) {
+    if (subCommand === 'score') {
+      const score = scores[message.author.id];
+      message.reply(`${score || 0}`);
+    }
+  }
 };
 
 const handleCommandMessages = (message: Message) => {
@@ -86,10 +88,15 @@ const handleCommandMessages = (message: Message) => {
     .slice(BOT_TRIGGER.length)
     .split(" ");
 
-  if (!command) return;
+  console.log(command, args);
+    
+  if (!command) {
+    message.reply("I'm not sure that means, m8");
+    return;
+  }
 
   const handler = commandHandlers[command];
-  if (handler) handler(message, args);
+  if (handler) handler(message, ...args);
 };
 
 startBot({
@@ -102,10 +109,6 @@ startBot({
     },
     messageCreate(message) {
       handleCommandMessages(message);
-      // console.log(message);
-      // if ([...message.mentions, ...message.mentionRoleIDs].includes(botID)) {
-      //   handleScoreQuery(message)
-      // }
     },
     reactionAdd(...args) {
       const [, emoji] = args;
