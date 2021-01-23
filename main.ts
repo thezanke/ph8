@@ -63,7 +63,7 @@ const handleScoreReactions: ReactionHandler = (
   if (remove) value *= -1;
 
   const messageAuthorID = message.author.id;
-  if (!messageAuthorID || false && messageAuthorID === userID) return;
+  if (!messageAuthorID || (false && messageAuthorID === userID)) return;
 
   let lastScore = scores[messageAuthorID] ?? 0;
   let newScore = lastScore + value;
@@ -83,7 +83,9 @@ const commandHandlers: {
   help(message, topic) {
     if (!topic) {
       message.reply(
-        ["Topics: `scoring`.", `Say "${BOT_TRIGGER} help [topic]".`].join("\n")
+        ["Topics: `scoring`.", "", `Say "${BOT_TRIGGER} help [topic]".`].join(
+          "\n"
+        )
       );
       return;
     }
