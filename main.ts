@@ -34,6 +34,7 @@ const SCORE_MAP: { [emojiName: string]: number | undefined } = {
   "💯": 100,
   "👍": 1,
   "👎": -1,
+  "💩": -5,
 };
 
 const getReactionValue = (emojiName?: string | null) =>
@@ -91,7 +92,7 @@ const commandHandlers: {
             ),
             "",
             'You can retrieve your score by saying "ph8, my score".',
-            'You can retrieve other users\' scores by saying "ph8, score @username"',
+            'You can retrieve other users\' scores by saying "ph8, score @username".',
           ].join("\n")
         );
         break;
