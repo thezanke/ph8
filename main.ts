@@ -68,17 +68,54 @@ const handleScoreReactions: ReactionHandler = (
 const BOT_TRIGGER = "ph8, ";
 
 const commandHandlers: {
-  [command: string]: (message: Message, ...args: any[]) => void;
+  [command: string]: (
+    message: Message,
+    ...args: Array<string | undefined>
+  ) => void;
 } = {
-  help(message) {
-    message.reply("hahahahaha");
+  help(message, topic) {
+    if (!topic) {
+      message.reply(["Topics: scoring", 'Say "ph8, help [topic]"'].join("\n"));
+      return;
+    }
+
+    switch (topic) {
+      case "scoring":
+        message.reply(
+          [
+            "You can react to messages with certain emoji to add or subtract from a users score.",
+            "",
+            "Reactions and their values: ",
+            ...Object.keys(SCORE_MAP).map(
+              (emoji) => `${emoji} == ${SCORE_MAP[emoji]}`
+            ),
+            "",
+            'You can retrieve your score by saying "ph8, my score".',
+            'You can retrieve other users\' scores by saying "ph8, score @username"',
+          ].join("\n")
+        );
+        break;
+    }
   },
   my(message, subCommand) {
-    if (subCommand === 'score') {
+    if (subCommand === "score") {
       const score = scores[message.author.id];
       message.reply(`${score || 0}`);
     }
-  }
+  },
+
+  score(message) {
+    if (message.mentions) {
+      message.reply(
+        message.mentions
+          .map((userID) => {
+            const score = scores[userID] || 0;
+            return `<@${userID}> has ${score} points`;
+          })
+          .join("\n")
+      );
+    }
+  },
 };
 
 const handleCommandMessages = (message: Message) => {
@@ -89,7 +126,7 @@ const handleCommandMessages = (message: Message) => {
     .split(" ");
 
   console.log(command, args);
-    
+
   if (!command) {
     message.reply("I'm not sure that means, m8");
     return;
