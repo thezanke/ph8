@@ -37,7 +37,7 @@ const REACTION_SCORES: { [emojiName: string]: number | undefined } = {
   "8️⃣": 8,
   "9️⃣": 9,
   "🔟": 10,
-  "💯": 5,
+  "💯": 10,
   "🏆": 10,
   "👍": 1,
   "👎": -1,
@@ -72,7 +72,7 @@ const handleScoreReactions: ReactionHandler = (
   console.log(scores);
 };
 
-const BOT_TRIGGER = "ph8";
+const BOT_TRIGGER = "ph8,";
 
 const commandHandlers: {
   [command: string]: (
@@ -83,7 +83,7 @@ const commandHandlers: {
   help(message, topic) {
     if (!topic) {
       message.reply(
-        ["Topics: `scoring`.", `Say "${BOT_TRIGGER}, help [topic]".`].join("\n")
+        ["Topics: `scoring`.", `Say "${BOT_TRIGGER} help [topic]".`].join("\n")
       );
       return;
     }
@@ -99,8 +99,8 @@ const commandHandlers: {
               (emoji) => `${emoji} == ${REACTION_SCORES[emoji]}`
             ),
             "",
-            `You can retrieve your score by saying "${BOT_TRIGGER}, my score".`,
-            `You can retrieve other users\' scores by saying "${BOT_TRIGGER}, score @username".`,
+            `You can retrieve your score by saying "${BOT_TRIGGER} my score".`,
+            `You can retrieve other users\' scores by saying "${BOT_TRIGGER} score @username".`,
           ].join("\n")
         );
         break;
