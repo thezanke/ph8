@@ -20,6 +20,12 @@ interface ReactionHandler {
 
 const scores: { [userID: string]: number } = {};
 
+// hydrate scores from file
+try {
+  const savedScores = JSON.parse(Deno.readTextFileSync("./scores.json"));
+  Object.assign(scores, savedScores);
+} catch {}
+
 const SCORE_MAP: { [emojiName: string]: number | undefined } = {
   "1️⃣": 1,
   "2️⃣": 2,
@@ -31,7 +37,7 @@ const SCORE_MAP: { [emojiName: string]: number | undefined } = {
   "8️⃣": 8,
   "9️⃣": 9,
   "🔟": 10,
-  "💯": 100,
+  "🏆": 50,
   "👍": 1,
   "👎": -1,
   "💩": -5,
@@ -54,15 +60,12 @@ const handleScoreReactions: ReactionHandler = (
   if (remove) value *= -1;
 
   const messageAuthorID = message.author.id;
-  if (!messageAuthorID || messageAuthorID === userID) return;
+  if (!messageAuthorID || false && messageAuthorID === userID) return;
 
   let lastScore = scores[messageAuthorID] ?? 0;
-  if (lastScore === 0 && remove) return;
-
   let newScore = lastScore + value;
-  if (newScore < 0) newScore = 0;
   scores[messageAuthorID] = newScore;
-
+  Deno.writeTextFile("./scores.json", JSON.stringify(scores, null, 2));
   console.log(scores);
 };
 
