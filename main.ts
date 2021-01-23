@@ -43,7 +43,9 @@ const REACTION_SCORES: { [emojiName: string]: number | undefined } = {
   "👎": -1,
   "⬆️": 1,
   "⬇️": -1,
+  "🍆": -3,
   "💩": -5,
+  "🤡": -10,
 };
 
 const getReactionValue = (emojiName?: string | null) =>
