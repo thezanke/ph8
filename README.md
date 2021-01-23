@@ -1,6 +1,6 @@
 # Requirements
 
-You will need (Deno)[https://deno.land] Installed
+You will need [Deno](https://deno.land) Installed
 
 # Config
 
