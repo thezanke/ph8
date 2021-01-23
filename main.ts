@@ -2,21 +2,25 @@ import {
   startBot,
   MessageReactionUncachedPayload,
   ReactionPayload,
-  Message
+  Message,
+  botID,
 } from "https://deno.land/x/discordeno@10.1.0/mod.ts";
 import config from "./config.ts";
 import httpServer from "./httpServer.ts";
 
-type ReactionHandler = (
-  payload: MessageReactionUncachedPayload,
-  emoji: ReactionPayload,
-  userID: string,
-  message?: Message
-) => any;
+interface ReactionHandler {
+  (
+    payload: MessageReactionUncachedPayload,
+    emoji: ReactionPayload,
+    userID: string,
+    message?: Message,
+    removal?: Boolean
+  ): any;
+}
 
 const scores: { [userID: string]: number } = {};
 
-const scoreMap: { [emojiName: string]: number | undefined } = {
+const SCORE_MAP: { [emojiName: string]: number | undefined } = {
   "1️⃣": 1,
   "2️⃣": 2,
   "3️⃣": 3,
@@ -30,18 +34,63 @@ const scoreMap: { [emojiName: string]: number | undefined } = {
   "💯": 100,
   "👍": 1,
   "👎": -1,
-}
+};
 
-const handleScoreReactionAdd: ReactionHandler = (_p, emoji, _u, message) => {
+const getReactionValue = (emojiName?: string | null) =>
+  emojiName && emojiName.length && SCORE_MAP[emojiName];
+
+const handleScoreReactions: ReactionHandler = (
+  _p,
+  emoji,
+  _u,
+  message,
+  remove = false
+) => {
   if (!message) return;
-  const userID = message.author.id;
-  if (!emoji.name) return;
-  let value = scoreMap[emoji.name];
+
+  let value = getReactionValue(emoji.name);
   if (!value) return;
+
+  const userID = message.author.id;
+  if (!userID) return;
+
+  if (remove) value *= -1;
+
   let lastScore = scores[userID] ?? 0;
+  let newScore = lastScore + value;
+
+  if (newScore < 0) newScore = 0;
+
   scores[userID] = lastScore + value;
   console.log(scores);
-}
+};
+
+const handleScoreQuery = (message: Message) => {
+  console.log(message);
+};
+
+const BOT_TRIGGER = "ph8, ";
+
+const commandHandlers: {
+  [command: string]: (message: Message, ...args: any[]) => void;
+} = {
+  help(message) {
+    message.reply("hahahahaha");
+  },
+};
+
+const handleCommandMessages = (message: Message) => {
+  if (!message.content.startsWith(BOT_TRIGGER)) return;
+
+  const [command, ...args] = message.content
+    .slice(BOT_TRIGGER.length)
+    .split(" ");
+
+  if (!command) return;
+
+  const handler = commandHandlers[command];
+  if (handler) handler(message, args);
+};
 
 startBot({
   token: config.BOT_TOKEN,
@@ -49,17 +98,24 @@ startBot({
   eventHandlers: {
     ready() {
       console.log("Successfully connected to gateway");
+      console.log(`botID: ${botID}`);
     },
     messageCreate(message) {
-      console.log(message);
-      if (message.content === "!ph8 ping") {
-        message.reply("Pong using Discordeno!");
-      }
+      handleCommandMessages(message);
+      // console.log(message);
+      // if ([...message.mentions, ...message.mentionRoleIDs].includes(botID)) {
+      //   handleScoreQuery(message)
+      // }
     },
     reactionAdd(...args) {
-      const [,emoji] = args;
+      const [, emoji] = args;
       if (!emoji.name) return;
-      handleScoreReactionAdd(...args);
+      handleScoreReactions(...args);
+    },
+    reactionRemove(...args) {
+      const [, emoji] = args;
+      if (!emoji.name) return;
+      handleScoreReactions(...args, true);
     },
   },
 });
