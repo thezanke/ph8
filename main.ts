@@ -51,18 +51,18 @@ const handleScoreReactions: ReactionHandler = (
 
   let value = getReactionValue(emoji.name);
   if (!value) return;
+  if (remove) value *= -1;
 
   const messageAuthorID = message.author.id;
   if (!messageAuthorID || messageAuthorID === userID) return;
 
-  if (remove) value *= -1;
-
   let lastScore = scores[messageAuthorID] ?? 0;
+  if (lastScore === 0 && remove) return;
+
   let newScore = lastScore + value;
-
   if (newScore < 0) newScore = 0;
-
   scores[messageAuthorID] = newScore;
+
   console.log(scores);
 };
 
