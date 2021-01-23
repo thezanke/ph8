@@ -1,5 +1,5 @@
 // @deno-types="https://unpkg.com/ky/index.d.ts"
-import ky from "https://unpkg.com/ky/index.js";
+import ky from "https://deno.land/x/ky@v0.23.0/index.js";
 import config from "./config.ts";
 import logger from "./logger.ts";
 
