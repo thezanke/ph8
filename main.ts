@@ -138,7 +138,7 @@ const handleCommandMessages = (message: Message) => {
 };
 
 startBot({
-  token: config.BOT_TOKEN,
+  token: config.DISCORD_BOT_TOKEN,
   intents: ["GUILDS", "GUILD_MESSAGES", "GUILD_MESSAGE_REACTIONS"],
   eventHandlers: {
     ready() {
@@ -161,4 +161,4 @@ startBot({
   },
 });
 
-await Promise.all([httpServer.listen({ port: config.HTTP_PORT })]);
+httpServer.listen({ port: config.HTTP_PORT });
