@@ -3,9 +3,9 @@ version: "3"
 services:
   ph8:
     build: .
-    restart: "always"
     env_file: ./.env
-    command: ["deno", "run", "-A", "--inspect", "./src/main.ts"]
+    restart: "always"
+    command: ["deno", "run", "-A", "--inspect=0.0.0.0:9229", "./src/main.ts"]
     ports: 
       - ${HTTP_PORT}:${HTTP_PORT}
       - 9229:9229
