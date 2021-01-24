@@ -1,6 +1,7 @@
 # Requirements
 
-You will need [Deno](https://deno.land) Installed.
+You will need [Deno](https://deno.land) installed.
+You will need [Docker](https://www.docker.com/products/docker-desktop) installed, or an alternative.
 
 # Config
 
@@ -8,10 +9,10 @@ Copy `.env.sample` to `.env` in the root and fill in the values.
 
 # Running
 
-Running the bot is simple, execute the following:
+Running the bot using the compose file, using `docker-compose` that would look like:
 
 ```sh
-deno run --allow-net --inspect main.ts
+docker-compose up
 ```
 
 # Debugging
