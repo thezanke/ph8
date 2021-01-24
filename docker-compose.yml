@@ -1,0 +1,7 @@
+version: "3"
+
+services:
+  ph8:
+    build: .
+    volumes: 
+      - ./data:/home/deno/data

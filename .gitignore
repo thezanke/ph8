@@ -1,4 +1,4 @@
-/config.ts
-/scores.json
+/data
+/data/*
 .DS_Store
 *.ignore*

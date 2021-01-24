@@ -5,8 +5,10 @@ import {
   Message,
   botID,
 } from "https://deno.land/x/discordeno@10.1.0/mod.ts";
-import config from "./config.ts";
+import config from "./data/config.ts";
 import httpServer from "./httpServer.ts";
+
+const SCORES_FILE_PATH = "./data/scores.json";
 
 interface ReactionHandler {
   (
@@ -22,7 +24,7 @@ const scores: { [userID: string]: number } = {};
 
 // hydrate scores from file
 try {
-  const savedScores = JSON.parse(Deno.readTextFileSync("./scores.json"));
+  const savedScores = JSON.parse(Deno.readTextFileSync(SCORES_FILE_PATH));
   Object.assign(scores, savedScores);
 } catch {}
 
@@ -70,7 +72,7 @@ const handleScoreReactions: ReactionHandler = (
   let lastScore = scores[messageAuthorID] ?? 0;
   let newScore = lastScore + value;
   scores[messageAuthorID] = newScore;
-  Deno.writeTextFile("./scores.json", JSON.stringify(scores, null, 2));
+  Deno.writeTextFile(SCORES_FILE_PATH, JSON.stringify(scores, null, 2));
   console.log(scores);
 };
 
