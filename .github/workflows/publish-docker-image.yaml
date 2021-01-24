@@ -30,4 +30,4 @@ jobs:
       - name: Save DigitalOcean kubeconfig
         run: doctl kubernetes cluster kubeconfig save thezanke-cluster
       - name: Update K8s Deployment
-        run: kubectl set image deployment/ph8 ph8=docker.pkg.github.com/thezanke/ph8/ph8:${{ github.release.tag_name }} --record
+        run: kubectl set image deployment/ph8 ph8=docker.pkg.github.com/thezanke/ph8/ph8:${{ github.event.release.tag_name }} --record
