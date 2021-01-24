@@ -67,7 +67,7 @@ const handleScoreReactions: ReactionHandler = (
   if (remove) value *= -1;
 
   const messageAuthorID = message.author.id;
-  if (!messageAuthorID || (false && messageAuthorID === userID)) return;
+  if (!messageAuthorID || messageAuthorID === userID) return;
 
   let lastScore = scores[messageAuthorID] ?? 0;
   let newScore = lastScore + value;
