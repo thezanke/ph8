@@ -3,7 +3,12 @@ version: "3"
 services:
   ph8:
     build: .
-    volumes: 
-      - ./data:/home/deno/data
+    restart: "always"
     env_file: ./.env
-    command: ["deno", "run", "-A", "--inspect", "main.ts"]
+    command: ["deno", "run", "-A", "--inspect", "./src/main.ts"]
+    ports: 
+      - ${HTTP_PORT}:${HTTP_PORT}
+      - 9229:9229
+    volumes: 
+      - ./src:/home/deno/src
+      - ./data:/home/deno/data

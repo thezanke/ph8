@@ -154,8 +154,8 @@ startBot({
   intents: ["GUILDS", "GUILD_MESSAGES", "GUILD_MESSAGE_REACTIONS"],
   eventHandlers: {
     ready() {
-      console.log("Successfully connected to gateway");
-      console.log(`botID: ${botID}`);
+      console.log("Successfully connected to gateway!");
+      console.log(`-> botID: ${botID}`);
     },
     messageCreate(message) {
       handleCommandMessages(message);
