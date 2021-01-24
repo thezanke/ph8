@@ -129,7 +129,7 @@ const handleCommandMessages = (message: Message) => {
 
   const [, command, ...args] = message.content.split(" ");
 
-  console.log({command, args});
+  console.log({ command, args });
 
   if (!command) {
     message.reply("I'm not sure what that means, m8");
@@ -163,7 +163,5 @@ startBot({
     },
   },
 });
-
-console.log('test');
 
 server.listen({ port: config.HTTP_PORT });

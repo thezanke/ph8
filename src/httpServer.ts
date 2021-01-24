@@ -1,5 +1,4 @@
-import { Application, Context, Router } from "https://deno.land/x/oak@v6.2.0/mod.ts";
-import { getScores } from "./scoring.ts";
+import { Application, Router } from "https://deno.land/x/oak@v6.2.0/mod.ts";
 
 export const router = new Router();
 router.get("/", (ctx) => {
