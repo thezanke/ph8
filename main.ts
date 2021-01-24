@@ -5,7 +5,7 @@ import {
   Message,
   botID,
 } from "https://deno.land/x/discordeno@10.1.0/mod.ts";
-import config from "./data/config.ts";
+import config from "./config.ts";
 import httpServer from "./httpServer.ts";
 
 const SCORES_FILE_PATH = "./data/scores.json";

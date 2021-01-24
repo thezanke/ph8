@@ -1,4 +1,3 @@
+/data
 Dockerfile
 .vscode
-scores.json
-config.ts
