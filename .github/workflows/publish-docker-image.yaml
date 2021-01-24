@@ -3,8 +3,8 @@ on:
   release:
     types: [published]
 jobs:
-  push_to_registries:
-    name: Push Docker image to multiple registries
+  push_to_registry:
+    name: Push to GitHub Container Registry
     runs-on: ubuntu-latest
     steps:
       - name: Check out the repo
