@@ -1,0 +1,16 @@
+name: Deploy release to K8s
+on: 
+  deployment
+jobs:
+  push_to_registries:
+    name: Deploy release to K8s
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install doctl
+        uses: digitalocean/action-doctl@v2
+        with:
+          token: ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
+      - name: Save DigitalOcean kubeconfig
+        run: doctl kubernetes cluster kubeconfig save thezanke-cluster
+      - name: Update K8s Deployment
+        run: kubectl set image deployment/ph8 ph8=docker.pkg.github.com/thezanke/ph8/ph8:$GITHUB_REF --record
