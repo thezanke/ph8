@@ -1,6 +1,6 @@
-const scores: { [userID: string]: number } = {};
-
 const SCORES_FILE_PATH = "./data/scores.json";
+
+const scores: { [userID: string]: number } = {};
 
 // hydrate scores from file
 try {
