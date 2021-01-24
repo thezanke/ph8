@@ -6,10 +6,10 @@ router.get("/", (ctx) => {
   ctx.response.body = "i am ph8";
 });
 
-router.get("/scores", (ctx) => {
+router.get("/scores.json", (ctx) => {
   const scores = getScores();
-  const scoreStr = JSON.stringify(scores, null, 2);
-  ctx.response.body = `${scoreStr}`;
+  ctx.response.headers.set('Content-Type', 'application/json');
+  ctx.response.body = `${JSON.stringify(scores, null, 2)}`;
 });
 
 export const server = new Application();
