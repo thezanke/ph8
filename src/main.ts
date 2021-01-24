@@ -6,9 +6,8 @@ import {
   botID,
 } from "https://deno.land/x/discordeno@10.1.0/mod.ts";
 import config from "./config.ts";
-import httpServer from "./httpServer.ts";
-
-const SCORES_FILE_PATH = "./data/scores.json";
+import { server } from "./httpServer.ts";
+import { getScore, setScore } from "./scoring.ts";
 
 interface ReactionHandler {
   (
@@ -20,15 +19,7 @@ interface ReactionHandler {
   ): any;
 }
 
-const scores: { [userID: string]: number } = {};
-
-// hydrate scores from file
-try {
-  const savedScores = JSON.parse(Deno.readTextFileSync(SCORES_FILE_PATH));
-  Object.assign(scores, savedScores);
-} catch {}
-
-const REACTION_SCORES: { [emojiName: string]: number | undefined } = {
+const REACTION_SCORES: { [reaction: string]: number | undefined } = {
   "1️⃣": 1,
   "2️⃣": 2,
   "3️⃣": 3,
@@ -72,11 +63,8 @@ const handleScoreReactions: ReactionHandler = (
   const messageAuthorID = message.author.id;
   if (!messageAuthorID || messageAuthorID === userID) return;
 
-  let lastScore = scores[messageAuthorID] ?? 0;
-  let newScore = lastScore + value;
-  scores[messageAuthorID] = newScore;
-  Deno.writeTextFile(SCORES_FILE_PATH, JSON.stringify(scores, null, 2));
-  console.log(scores);
+  let lastScore = getScore(messageAuthorID);
+  setScore(messageAuthorID, lastScore + value);
 };
 
 const BOT_TRIGGER = "ph8,";
@@ -117,7 +105,7 @@ const commandHandlers: {
   },
   my(message, subCommand) {
     if (subCommand === "score") {
-      const score = scores[message.author.id];
+      const score = getScore(message.author.id);
       message.reply(`${score || 0}`);
     }
   },
@@ -127,7 +115,7 @@ const commandHandlers: {
       message.reply(
         message.mentions
           .map((userID) => {
-            const score = scores[userID] || 0;
+            const score = getScore(userID);
             return `<@${userID}> has ${score} points`;
           })
           .join("\n")
@@ -141,10 +129,10 @@ const handleCommandMessages = (message: Message) => {
 
   const [, command, ...args] = message.content.split(" ");
 
-  console.log(command, args);
+  console.log({command, args});
 
   if (!command) {
-    message.reply("I'm not sure that means, m8");
+    message.reply("I'm not sure what that means, m8");
     return;
   }
 
@@ -176,4 +164,6 @@ startBot({
   },
 });
 
-httpServer.listen({ port: config.HTTP_PORT });
+console.log('test');
+
+server.listen({ port: config.HTTP_PORT });

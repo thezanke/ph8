@@ -4,11 +4,11 @@ services:
   ph8:
     build: .
     env_file: ./.env
-    restart: "always"
-    command: ["deno", "run", "-A", "--inspect=0.0.0.0:9229", "src/main.ts"]
     ports: 
-      - ${HTTP_PORT}:${HTTP_PORT}
-      - 9229:9229
+      - "${HTTP_PORT}:${HTTP_PORT}"
+      - "9229:9229"
+    restart: "always"
+    command: ["deno", "run", "-A", "--inspect-brk=0.0.0.0:9229", "src/main.ts"]
     volumes: 
       - ./src:/home/deno/src
       - ./data:/home/deno/data
