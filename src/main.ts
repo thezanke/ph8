@@ -30,6 +30,7 @@ const REACTION_SCORES: { [reaction: string]: number | undefined } = {
   "8️⃣": 8,
   "9️⃣": 9,
   "🔟": 10,
+  "0️⃣": -10,
   "💯": 10,
   "🏆": 10,
   "👍": 1,
