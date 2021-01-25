@@ -125,7 +125,7 @@ const commandHandlers: {
 };
 
 const handleCommandMessages = (message: Message) => {
-  if (!message.content.startsWith(BOT_TRIGGER)) return;
+  if (!message.content.toLowerCase().startsWith(BOT_TRIGGER)) return;
 
   const [, command, ...args] = message.content.split(" ");
 
