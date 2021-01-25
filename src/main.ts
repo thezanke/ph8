@@ -67,7 +67,7 @@ const handleScoreReactions: ReactionHandler = (
   setScore(messageAuthorID, lastScore + value);
 };
 
-const BOT_TRIGGER = "ph8,";
+const BOT_TRIGGER = "ph8";
 
 const commandHandlers: {
   [command: string]: (
