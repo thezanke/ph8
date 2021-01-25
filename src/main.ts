@@ -132,12 +132,17 @@ const handleCommandMessages = (message: Message) => {
   console.log({ command, args });
 
   if (!command) {
-    message.reply("I'm not sure what that means, m8");
+    message.reply("Yeah, bud?");
     return;
   }
 
   const handler = commandHandlers[command];
-  if (handler) handler(message, ...args);
+  if (handler) {
+    handler(message, ...args);
+    return;
+  }
+
+  message.reply("I'm not sure what that means, m8.");
 };
 
 startBot({
