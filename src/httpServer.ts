@@ -2,7 +2,7 @@ import { Application, Router } from "https://deno.land/x/oak@v6.2.0/mod.ts";
 
 export const router = new Router();
 router.get("/", (ctx) => {
-  ctx.response.body = "i am ph8";
+  ctx.response.body = "i am ph8, hello world";
 });
 
 router.get("/scores.json", async (ctx) => {
