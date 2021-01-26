@@ -128,7 +128,7 @@ const commandHandlers: {
 const handleFunnyReplies = (message: Message) => {
   if (/but I digress/gi.test(message.content)) {
     message.reply(
-      "You've digressed? Are you sure?\nhttps://www.google.com/search?q=digress"
+      "You've digressed? Are you sure?\nhttps://www.google.com/search?q=digress",
     );
     return;
   }
