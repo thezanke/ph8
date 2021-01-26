@@ -125,13 +125,24 @@ const commandHandlers: {
   },
 };
 
-const handleFunnyReplies = (message: Message) => {
+const handleButIDigress = (message: Message) => {
   if (/but I digress/gi.test(message.content)) {
     message.reply(
       "You've digressed? Are you sure?\nhttps://www.google.com/search?q=digress",
     );
     return;
   }
+}
+
+const BAD_SOURCES = ['bitchute.com', 'breitbart.com']
+
+const handleBadSources = (message: Message) => {
+  console.log(message);
+};
+
+const handleFunnyReplies = (message: Message) => {
+  handleButIDigress(message);
+  handleBadSources(message);
 };
 
 const handleCommandMessages = (message: Message) => {
