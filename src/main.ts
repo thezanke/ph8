@@ -15,7 +15,7 @@ interface ReactionHandler {
     emoji: ReactionPayload,
     userID: string,
     message?: Message,
-    removal?: Boolean
+    removal?: Boolean,
   ): any;
 }
 
@@ -53,7 +53,7 @@ const handleScoreReactions: ReactionHandler = (
   emoji,
   userID,
   message,
-  remove = false
+  remove = false,
 ) => {
   if (!message) return;
 
@@ -80,8 +80,8 @@ const commandHandlers: {
     if (!topic) {
       message.reply(
         ["Topics: `scoring`.", "", `Say "${BOT_TRIGGER} help [topic]".`].join(
-          "\n"
-        )
+          "\n",
+        ),
       );
       return;
     }
@@ -94,12 +94,12 @@ const commandHandlers: {
             "",
             "Reactions and their values: ",
             ...Object.keys(REACTION_SCORES).map(
-              (emoji) => `${emoji} == ${REACTION_SCORES[emoji]}`
+              (emoji) => `${emoji} == ${REACTION_SCORES[emoji]}`,
             ),
             "",
             `You can retrieve your score by saying "${BOT_TRIGGER} my score".`,
             `You can retrieve other users\' scores by saying "${BOT_TRIGGER} score @username".`,
-          ].join("\n")
+          ].join("\n"),
         );
         break;
     }
@@ -112,14 +112,14 @@ const commandHandlers: {
   },
 
   score(message) {
-    if (message.mentions) {
+    if (message.mentions.length) {
       message.reply(
         message.mentions
           .map((userID) => {
             const score = getScore(userID);
             return `<@${userID}> has ${score} points`;
           })
-          .join("\n")
+          .join("\n"),
       );
     }
   },
