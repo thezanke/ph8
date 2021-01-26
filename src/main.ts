@@ -6,7 +6,9 @@ import {
   botID,
 } from "https://deno.land/x/discordeno@10.1.0/mod.ts";
 import config from "./config.ts";
-import { server } from "./httpServer.ts";
+import { handleDigression } from "./handle_digression.ts";
+import { handlePoorSources } from "./handle_poor_sources.ts";
+import { server } from "./http_server.ts";
 import { getScore, setScore } from "./scoring.ts";
 
 interface ReactionHandler {
@@ -15,7 +17,7 @@ interface ReactionHandler {
     emoji: ReactionPayload,
     userID: string,
     message?: Message,
-    removal?: Boolean,
+    removal?: Boolean
   ): any;
 }
 
@@ -53,7 +55,7 @@ const handleScoreReactions: ReactionHandler = (
   emoji,
   userID,
   message,
-  remove = false,
+  remove = false
 ) => {
   if (!message) return;
 
@@ -80,8 +82,8 @@ const commandHandlers: {
     if (!topic) {
       message.reply(
         ["Topics: `scoring`.", "", `Say "${BOT_TRIGGER} help [topic]".`].join(
-          "\n",
-        ),
+          "\n"
+        )
       );
       return;
     }
@@ -94,12 +96,12 @@ const commandHandlers: {
             "",
             "Reactions and their values: ",
             ...Object.keys(REACTION_SCORES).map(
-              (emoji) => `${emoji} == ${REACTION_SCORES[emoji]}`,
+              (emoji) => `${emoji} == ${REACTION_SCORES[emoji]}`
             ),
             "",
             `You can retrieve your score by saying "${BOT_TRIGGER} my score".`,
             `You can retrieve other users\' scores by saying "${BOT_TRIGGER} score @username".`,
-          ].join("\n"),
+          ].join("\n")
         );
         break;
     }
@@ -119,30 +121,14 @@ const commandHandlers: {
             const score = getScore(userID);
             return `<@${userID}> has ${score} points`;
           })
-          .join("\n"),
+          .join("\n")
       );
     }
   },
 };
 
-const handleButIDigress = (message: Message) => {
-  if (/but I digress/gi.test(message.content)) {
-    message.reply(
-      "You've digressed? Are you sure?\nhttps://www.google.com/search?q=digress",
-    );
-    return;
-  }
-}
-
-const BAD_SOURCES = ['bitchute.com', 'breitbart.com']
-
-const handleBadSources = (message: Message) => {
-  console.log(message);
-};
-
 const handleFunnyReplies = (message: Message) => {
-  handleButIDigress(message);
-  handleBadSources(message);
+  handleDigression(message) || handlePoorSources(message);
 };
 
 const handleCommandMessages = (message: Message) => {
