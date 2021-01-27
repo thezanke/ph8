@@ -16,7 +16,7 @@ export const handlePoorSources = (message: Message) => {
   if (!config.POOR_SOURCES?.length) return;
 
   const poorSources = config.POOR_SOURCES.join("|");
-  const re = new RegExp(`https?://(?:[a-z]+.)+(?:${poorSources})`, "gi");
+  const re = new RegExp(`https?://(?:[a-z]+.)*(?:${poorSources})`, "gi");
 
   if (!re.test(message.content)) return;
 
