@@ -9,10 +9,18 @@ export const handleReactionReplies = (message: Message) => {
   const messageAuthorID = message.referencedMessageID?.author?.id;
   if (!messageAuthorID || messageAuthorID === userID) return;
 
-  const [emojiName] = message.content.split(' ');
+  const [emojiName, ...rest] = message.content.split(" ");
+
+  if (rest.length) return;
 
   let value = REACTION_SCORES[emojiName];
   if (!value) return;
+
+  const [
+    referencedEmojiName,
+    ...rRest
+  ] = message.referencedMessageID.content.split(" ");
+  if (REACTION_SCORES[referencedEmojiName] && !rRest.length) return;
 
   let lastScore = getScore(messageAuthorID);
   setScore(messageAuthorID, lastScore + value);
@@ -20,4 +28,4 @@ export const handleReactionReplies = (message: Message) => {
   console.log("handled reaction reply");
 
   return true;
-}
+};
