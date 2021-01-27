@@ -1,5 +1,32 @@
 const SCORES_FILE_PATH = "./data/scores.json";
 
+
+export const REACTION_SCORES: { [reaction: string]: number | undefined } = {
+  "1️⃣": 1,
+  "2️⃣": 2,
+  "3️⃣": 3,
+  "4️⃣": 4,
+  "5️⃣": 5,
+  "6️⃣": 6,
+  "7️⃣": 7,
+  "8️⃣": 8,
+  "9️⃣": 9,
+  "🔟": 10,
+  "0️⃣": -10,
+  "💯": 10,
+  "🏆": 10,
+  "👍": 1,
+  "👎": -1,
+  "⬆️": 1,
+  "⬇️": -1,
+  "👏": 1,
+  "😂": 1,
+  "🤣": 1,
+  "🍆": -3,
+  "💩": -5,
+  "🤡": -10,
+};
+
 const scores: { [userID: string]: number } = {};
 
 // hydrate scores from file
