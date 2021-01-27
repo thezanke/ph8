@@ -1,7 +1,6 @@
 import {
-  MessageReactionUncachedPayload,
-  ReactionPayload,
-  Message,
+  Message, MessageReactionUncachedPayload,
+  ReactionPayload
 } from "https://deno.land/x/discordeno@10.1.0/mod.ts";
 import { getScore, REACTION_SCORES, setScore } from "./scoring.ts";
 

@@ -1,8 +1,4 @@
-import {
-  startBot,
-  Message,
-  botID,
-} from "https://deno.land/x/discordeno@10.1.0/mod.ts";
+import { botID, startBot } from "https://deno.land/x/discordeno@10.1.0/mod.ts";
 import config from "./config.ts";
 import { handleCommands } from "./handle_commands.ts";
 import { handleDigression } from "./handle_digression.ts";
