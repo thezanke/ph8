@@ -11,7 +11,7 @@ import { handleReactions } from "./handle_reactions.ts";
 import { server } from "./http_server.ts";
 
 const handleFunnyReplies = (message: Message) => {
-  return handleDigression(message) || handlePoorSources(message) || console.log(message);
+  return handleDigression(message) || handlePoorSources(message);
 };
 
 startBot({
