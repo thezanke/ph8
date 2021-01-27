@@ -1,6 +1,6 @@
 import { Message } from "https://deno.land/x/discordeno@10.1.0/mod.ts";
 import config from "./config.ts";
-import { pickRandom } from "./utils.ts";
+import { pickRandom, randomInt } from "./utils.ts";
 
 const REPLIES = ["uhhhh....", "yikeees.", "hahhahhahahahaha", "oh boy", "🍿🤡"];
 
@@ -11,8 +11,10 @@ export const handlePoorSources = (message: Message) => {
   const re = new RegExp(`https?://(?:[a-z]+.)+(?:${poorSources})`, "gi");
 
   if (!re.test(message.content)) return;
-  
-  message.reply(pickRandom(REPLIES));
+
+  setTimeout(() => {
+    message.reply(pickRandom(REPLIES));
+  }, randomInt(300, 3000));
 
   return true;
 };
