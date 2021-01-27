@@ -13,9 +13,9 @@ const commandHandlers: {
     if (!topic) {
       message.reply(
         [
-          "Topics: `scoring`.",
+          "Topics: `scoring`, `reactions`.",
           "",
-          `Say "${COMMAND_TRIGGER} help [topic]".`,
+          `Say \`${COMMAND_TRIGGER} help [topic]\`.`,
         ].join("\n")
       );
       return;
@@ -26,14 +26,19 @@ const commandHandlers: {
         message.reply(
           [
             "You can react to messages with certain emoji to add or subtract from a users score.",
-            "",
+            `You can get a list of possible reactions by saying \`${COMMAND_TRIGGER} help reactions\`.`,
+            `You can retrieve your score by saying \`${COMMAND_TRIGGER} my score\`.`,
+            `You can retrieve other users\' scores by saying \`${COMMAND_TRIGGER} score @username\`.`,
+          ].join("\n")
+        );
+        break;
+      case "reactions":
+        message.reply(
+          [
             "Reactions and their values: ",
             ...Object.keys(REACTION_SCORES).map(
               (emoji) => `${emoji} == ${REACTION_SCORES[emoji]}`
             ),
-            "",
-            `You can retrieve your score by saying "${COMMAND_TRIGGER} my score".`,
-            `You can retrieve other users\' scores by saying "${COMMAND_TRIGGER} score @username".`,
           ].join("\n")
         );
         break;
