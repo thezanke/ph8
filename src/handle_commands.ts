@@ -25,7 +25,7 @@ const commandHandlers: {
       case "scoring":
         message.reply(
           [
-            "You can react to messages with certain emoji to add or subtract from a users score.",
+            "You can react to messages with certain emoji to add or subtract from a users score. You can alternatively reply with a single emoji for the same effect.",
             `You can get a list of possible reactions by saying \`${COMMAND_TRIGGER} help reactions\`.`,
             `You can retrieve your score by saying \`${COMMAND_TRIGGER} my score\`.`,
             `You can retrieve other users\' scores by saying \`${COMMAND_TRIGGER} score @username\`.`,
