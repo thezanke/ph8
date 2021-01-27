@@ -10,10 +10,6 @@ import { handlePoorSources } from "./handle_poor_sources.ts";
 import { handleReactions } from "./handle_reactions.ts";
 import { server } from "./http_server.ts";
 
-const handleFunnyReplies = (message: Message) => {
-  return handleDigression(message) || handlePoorSources(message);
-};
-
 startBot({
   token: config.DISCORD_BOT_TOKEN,
   intents: ["GUILDS", "GUILD_MESSAGES", "GUILD_MESSAGE_REACTIONS"],
@@ -23,7 +19,9 @@ startBot({
       console.log(`-> botID: ${botID}`);
     },
     messageCreate(message) {
-      handleCommands(message) || handleFunnyReplies(message);
+      handleCommands(message) ||
+        handleDigression(message) ||
+        handlePoorSources(message);
     },
     reactionAdd(...args) {
       const [, emoji] = args;
