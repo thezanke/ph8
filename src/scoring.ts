@@ -40,3 +40,7 @@ export const setScore = (userID: string, score: number) => {
   scores[userID] = score;
   Deno.writeTextFile(SCORES_FILE_PATH, JSON.stringify(scores, null, 2));
 };
+export const addScore = (userID: string, amt: number) => {
+  const score = getScore(userID);
+  setScore(userID, score + amt);
+}

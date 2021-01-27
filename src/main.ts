@@ -4,6 +4,7 @@ import { handleCommands } from "./handle_commands.ts";
 import { handleDigression } from "./handle_digression.ts";
 import { handlePoorSources } from "./handle_poor_sources.ts";
 import { handleReactions } from "./handle_reactions.ts";
+import { handleReactionReplies } from "./handle_reaction_replies.ts";
 import { server } from "./http_server.ts";
 
 startBot({
@@ -16,6 +17,7 @@ startBot({
     },
     messageCreate(message) {
       handleCommands(message) ||
+        handleReactionReplies(message) ||
         handleDigression(message) ||
         handlePoorSources(message);
     },
