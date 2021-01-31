@@ -1,4 +1,4 @@
-FROM ghcr.io/thezanke/base/deno:latest
+FROM ghcr.io/thezanke/base-images/deno:latest
 
 LABEL org.opencontainers.image.source https://github.com/thezanke/ph8
 
