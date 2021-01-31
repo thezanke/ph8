@@ -1,4 +1,4 @@
-FROM docker.pkg.github.com/thezanke/base-images/deno
+FROM docker.pkg.github.com/thezanke/base-images/deno:latest
 
 COPY src src
 RUN deno cache main.ts
