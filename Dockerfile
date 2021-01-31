@@ -1,4 +1,6 @@
-FROM docker.pkg.github.com/thezanke/base-images/deno:latest
+FROM ghcr.io/thezanke/base/deno:latest
+
+LABEL org.opencontainers.image.source https://github.com/thezanke/ph8
 
 COPY src src
 RUN deno cache main.ts
