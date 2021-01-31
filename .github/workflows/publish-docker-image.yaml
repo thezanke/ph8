@@ -28,6 +28,6 @@ jobs:
         with:
           token: ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
       - name: Save DigitalOcean kubeconfig
-        run: doctl kubernetes cluster kubeconfig save thezanke-cluster
+        run: doctl kubernetes cluster kubeconfig save ${{ secrets.CLUSTER_NAME }}
       - name: Update K8s Deployment
         run: kubectl set image statefulset/ph8 ph8=docker.pkg.github.com/thezanke/ph8/ph8:${{ github.event.release.tag_name }} --record
