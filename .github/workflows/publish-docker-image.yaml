@@ -34,6 +34,8 @@ jobs:
           platforms: linux/amd64
           push: true
           tags: ghcr.io/thezanke/ph8:latest
+          cache-from: type=local,src=/tmp/.buildx-cache
+          cache-to: type=local,dest=/tmp/.buildx-cache
   deploy_to_k8s:
     name: Deploy to K8s
     runs-on: ubuntu-latest
