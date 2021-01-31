@@ -16,7 +16,7 @@ const config: Config = {
   LOG_LEVEL: logLevel ?? "INFO",
   HTTP_PORT: httpPort ? Number(httpPort) : 3333,
   DISCORD_BOT_TOKEN: discordBotToken,
-  POOR_SOURCES: poorSources?.split(","),
+  POOR_SOURCES: poorSources?.split(/\r?\n/),
 };
 
 export default config;
