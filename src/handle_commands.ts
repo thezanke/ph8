@@ -63,6 +63,18 @@ const commandHandlers: {
       );
     }
   },
+
+  google(message, ...words) {
+    const queryPhrase = words.join("+");
+    message.reply(
+      `You lazy bastard...\nhttps://www.google.com/search?q=${queryPhrase}&btnI`
+    );
+    return;
+  },
+
+  testing(message) {
+    message.reply("pass");
+  },
 };
 
 export const handleCommands = (message: Message) => {

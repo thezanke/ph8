@@ -1,0 +1,10 @@
+{
+  "$schema": "https://deno.land/x/denon/schema.json",
+  "allow": ["net", "read", "write", "env"],
+  "scripts": {
+    "start": "deno run ./src/main.ts"
+  },
+  "watcher": {
+    "legacy": true
+  }
+}

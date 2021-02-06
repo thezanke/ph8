@@ -1,4 +1,5 @@
 /data
 Dockerfile
+docker-compose.yml
 .vscode
 .env
