@@ -5,7 +5,6 @@ services:
     build: 
       context: .
       target: development
-    command: denon debug
     env_file: .env
     ports: 
       - ${HTTP_PORT}:${HTTP_PORT}
