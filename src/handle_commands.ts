@@ -71,10 +71,6 @@ const commandHandlers: {
     );
     return;
   },
-
-  testing(message) {
-    message.reply("pass");
-  },
 };
 
 export const handleCommands = (message: Message) => {

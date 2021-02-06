@@ -2,7 +2,12 @@
   "$schema": "https://deno.land/x/denon/schema.json",
   "allow": ["net", "read", "write", "env"],
   "scripts": {
-    "start": "deno run ./src/main.ts"
+    "start": "deno run ./src/main.ts",
+    "debug": {
+      "cmd": "deno run ./src/main.ts",
+      "watch": false,
+      "inspect": "0.0.0.0:9229"
+    }
   },
   "watcher": {
     "legacy": true
