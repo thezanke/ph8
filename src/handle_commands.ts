@@ -65,10 +65,8 @@ const commandHandlers: {
   },
 
   google(message, ...words) {
-    const queryPhrase = words.join("+");
-    message.reply(
-      `You lazy bastard...\nhttps://www.google.com/search?q=${queryPhrase}&btnI`
-    );
+    const searchPhrase = encodeURIComponent(words.join(" "));
+    message.reply(`You lazy bastard...\nhttps://www.google.com/search?q=${searchPhrase}&btnI`);
     return;
   },
 };
