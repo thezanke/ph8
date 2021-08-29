@@ -33,13 +33,14 @@ jobs:
       - name: Build and push
         uses: docker/build-push-action@v2
         with:
+          cache-from: type=local,src=/tmp/.buildx-cache
+          cache-to: type=local,dest=/tmp/.buildx-cache
           context: .
           file: ./Dockerfile
           platforms: linux/amd64
           push: true
           tags: ghcr.io/thezanke/ph8:latest
-          cache-from: type=local,src=/tmp/.buildx-cache
-          cache-to: type=local,dest=/tmp/.buildx-cache
+          target: production
   deploy_to_k8s:
     name: Deploy to K8s
     runs-on: ubuntu-latest
