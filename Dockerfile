@@ -8,7 +8,7 @@ RUN deno install --allow-read --allow-run --allow-write -f --unstable https://de
 COPY scripts.json .
 CMD ["denon", "start"]
 
-FROM ghcr.io/thezanke/base-images/deno:latest as production
+FROM ghcr.io/thezanke/base-images/deno:1.13.2 as production
 ENV DENO_DIR=/home/deno/.cache
 LABEL org.opencontainers.image.source https://github.com/thezanke/ph8
 COPY --from=base /home/deno/deno-lock.json ./
