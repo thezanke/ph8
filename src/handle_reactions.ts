@@ -1,37 +1,23 @@
-import {
-  Message, MessageReactionUncachedPayload,
-  ReactionPayload
-} from "https://deno.land/x/discordeno@10.1.0/mod.ts";
+import { discord } from "./deps.ts";
 import { getScore, REACTION_SCORES, setScore } from "./scoring.ts";
 
-interface ReactionHandler {
-  (
-    payload: MessageReactionUncachedPayload,
-    emoji: ReactionPayload,
-    userID: string,
-    message?: Message,
-    removal?: Boolean
-  ): any;
-}
-
-export const handleReactions: ReactionHandler = (
-  _p,
-  emoji,
-  userID,
-  message,
-  remove = false
+export const handleReactions = (
+  data: discord.MessageReactionAdd|discord.MessageReactionRemove,
+  message?: discord.DiscordenoMessage,
+  isRemove = false
 ) => {
-  if (!message) return;
-  if (!emoji.name?.length) return;
+  if (!data || !message) return;
+  if (!data.emoji.name) return;
+  if (!data.emoji.name.length) return;
 
-  let value = REACTION_SCORES[emoji.name];
+  let value = REACTION_SCORES[data.emoji.name];
   if (!value) return;
 
-  if (remove) value *= -1;
+  if (isRemove) value *= -1;
 
-  const messageAuthorID = message.author.id;
-  if (!messageAuthorID || messageAuthorID === userID) return;
+  const messageAuthorID = message.authorId;
+  if (!messageAuthorID || `${messageAuthorID}` === data.userId) return;
 
-  let lastScore = getScore(messageAuthorID);
+  const lastScore = getScore(messageAuthorID);
   setScore(messageAuthorID, lastScore + value);
 };

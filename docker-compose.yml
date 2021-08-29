@@ -9,7 +9,7 @@ services:
     ports: 
       - ${HTTP_PORT}:${HTTP_PORT}
       - 9229:9229
-    restart: "always"
+    restart: always
     volumes: 
       - ./src:/home/deno/src
       - ./data:/home/deno/data

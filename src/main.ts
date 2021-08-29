@@ -1,4 +1,4 @@
-import { botID, startBot } from "https://deno.land/x/discordeno@10.1.0/mod.ts";
+import { discord } from "./deps.ts";
 import config from "./config.ts";
 import { handleCommands } from "./handle_commands.ts";
 import { handleDigression } from "./handle_digression.ts";
@@ -9,13 +9,13 @@ import { server } from "./http_server.ts";
 
 try {
   await Promise.all([
-    startBot({
+    discord.startBot({
       token: config.DISCORD_BOT_TOKEN,
-      intents: ["GUILDS", "GUILD_MESSAGES", "GUILD_MESSAGE_REACTIONS"],
+      intents: ["Guilds", "GuildMessages", "GuildMessageReactions"],
       eventHandlers: {
         ready() {
           console.log("Successfully connected to gateway!");
-          console.log(`-> botID: ${botID}`);
+          console.log(`-> botID: ${discord.botId}`);
         },
         messageCreate(message) {
           handleCommands(message) ||
@@ -23,15 +23,11 @@ try {
             handleDigression(message) ||
             handlePoorSources(message);
         },
-        reactionAdd(...args) {
-          const [, emoji] = args;
-          if (!emoji.name) return;
-          handleReactions(...args);
+        reactionAdd(data, message) {
+          handleReactions(data, message);
         },
-        reactionRemove(...args) {
-          const [, emoji] = args;
-          if (!emoji.name) return;
-          handleReactions(...args, true);
+        reactionRemove(data, message) {
+          handleReactions(data, message, true);
         },
       },
     }),

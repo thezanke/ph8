@@ -32,15 +32,17 @@ const scores: { [userID: string]: number } = {};
 try {
   const savedScores = JSON.parse(Deno.readTextFileSync(SCORES_FILE_PATH));
   Object.assign(scores, savedScores);
-} catch {}
+} catch {
+  // do nothing
+}
 
 export const getScores = () => ({ ...scores });
-export const getScore = (userID: string) => scores[userID] ?? 0;
-export const setScore = (userID: string, score: number) => {
-  scores[userID] = score;
+export const getScore = (userID: string|bigint) => scores[`${userID}`] ?? 0;
+export const setScore = (userID: string|bigint, score: number) => {
+  scores[`${userID}`] = score;
   Deno.writeTextFile(SCORES_FILE_PATH, JSON.stringify(scores, null, 2));
 };
-export const addScore = (userID: string, amt: number) => {
+export const addScore = (userID: string|bigint, amt: number) => {
   const score = getScore(userID);
   setScore(userID, score + amt);
 }
