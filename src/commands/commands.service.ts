@@ -3,7 +3,7 @@ import { OnEvent } from '@nestjs/event-emitter';
 import { Message } from 'discord.js';
 
 import { DISCORD_EVENTS } from '../discord/constants';
-import { Command } from './types';
+import { CommandService } from './types';
 
 const BOT_NAME = 'ph8';
 const DEFAULT_COMMAND = 'chitchat';
@@ -12,7 +12,7 @@ const UNKNOWN_COMMAND = 'unknown';
 @Injectable()
 export class CommandsService {
   private readonly logger = new Logger(CommandsService.name);
-  private readonly commands: Record<string, Command> = {};
+  private readonly commands: Record<string, CommandService> = {};
 
   @OnEvent(DISCORD_EVENTS.messageCreate)
   public async handleMessage(message: Message) {
@@ -20,7 +20,7 @@ export class CommandsService {
     await this.handleCommand(message);
   }
 
-  public registerCommand(command: Command) {
+  public registerCommand(command: CommandService) {
     this.commands[command.commandName] = command;
     this.logger.log(`"${command.commandName}" command registered`);
   }
@@ -41,12 +41,21 @@ export class CommandsService {
 
   private async handleCommand(message: Message) {
     const [commandName, args] = this.getCommandNameAndArgs(message.content);
+
+    if (commandName === 'commands') return this.replyWithCommandsList(message);
+
     const command = this.getCommand(commandName);
 
     if (!command) return;
 
     this.logCommand(command.commandName, message.author.username, args);
     await command.execute(message, ...args);
+  }
+
+  private replyWithCommandsList(message: Message) {
+    const commands = Object.values(this.commands).filter((cmd) => !cmd.omitFromListing);
+    const commandNames = commands.map((cmd) => cmd.commandName);
+    message.reply(`Available commands: ${commandNames.join(', ')}.`);
   }
 
   private logCommand(commandName: string, username: string, args: string[]) {
