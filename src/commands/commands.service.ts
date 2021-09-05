@@ -39,10 +39,8 @@ export class CommandsService {
 
   private async handleCommand(message: Message) {
     const [commandName, args] = this.getCommandNameAndArgs(message.content);
-
     const command = this.getCommand(commandName);
     if (!command) return;
-
     this.logCommand(command.commandName, message.author.username, args);
     await command.execute(message, ...args);
   }
