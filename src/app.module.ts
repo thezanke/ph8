@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { EventEmitterModule } from '@nestjs/event-emitter';
+import { CommandsModule } from './commands/commands.module';
 import { validate } from './config/validate';
 import { DigressionService } from './digression.service';
 import { DiscordModule } from './discord/discord.module';
@@ -10,7 +11,13 @@ import { ReactionsService } from './reactions.service';
 import { ScoringModule } from './scoring/scoring.module';
 
 @Module({
-  imports: [ConfigModule.forRoot({ validate }), EventEmitterModule.forRoot(), ScoringModule, DiscordModule],
+  imports: [
+    ConfigModule.forRoot({ validate }),
+    EventEmitterModule.forRoot(),
+    ScoringModule,
+    DiscordModule,
+    CommandsModule,
+  ],
   controllers: [HealthController],
   providers: [DigressionService, PoorSourcesService, ReactionsService],
 })
