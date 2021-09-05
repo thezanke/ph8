@@ -5,14 +5,6 @@ import { CommandsService } from './commands.service';
 import { Command } from './types';
 import { ScoringService } from '../scoring/scoring.service';
 
-enum Subcommand {
-  Help = 'help',
-}
-
-interface SubcommandFn {
-  (message: Message, ...args: any[]): any;
-}
-
 @Injectable()
 export class ScoreCommandService implements Command {
   public commandName = 'score';
