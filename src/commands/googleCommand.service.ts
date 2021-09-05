@@ -13,6 +13,11 @@ export class GoogleCommandService implements CommandService {
   }
 
   public execute(message: Message, ...words) {
+    if (!words.length) {
+      message.reply('Google what?');
+      return;
+    }
+
     const searchPhrase = encodeURIComponent(words.join(' '));
     message.reply(`Ugh, you're so lazy...\nhttps://www.google.com/search?q=${searchPhrase}&btnI`);
   }
