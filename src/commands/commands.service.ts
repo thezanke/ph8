@@ -16,7 +16,6 @@ export class CommandsService {
   @OnEvent(DISCORD_EVENTS.messageCreate)
   public async handleMessage(message: Message) {
     if (!this.determineIfCommand(message.content)) return;
-    this.logger.verbose(`${message.author.username} has digressed`);
     await this.handleCommand(message);
   }
 
