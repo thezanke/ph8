@@ -22,7 +22,7 @@ export class DigressionService {
   }
 
   private handleDigression(message: Message) {
-    this.scoringService.addScore(message.author.id, -1);
+    this.scoringService.removeScore(message.author.id, 1);
     message.reply("You've digressed? Are you sure?\nhttps://www.google.com/search?q=digress");
   }
 }

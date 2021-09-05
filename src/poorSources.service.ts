@@ -36,7 +36,7 @@ export class PoorSourcesService {
   }
 
   private handlePoorSources(message: Message, count: number) {
-    this.scoringService.addScore(message.author.id, -3 * count);
+    this.scoringService.removeScore(message.author.id, 3 * count);
     message.reply(pickRandom(this.replies));
   }
 
