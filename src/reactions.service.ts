@@ -31,9 +31,9 @@ export const REACTION_SCORES: Record<string, number | undefined> = {
 
 @Injectable()
 export class ReactionsService {
-  constructor(private readonly scoringService: ScoringService) {}
-
   private readonly logger = new Logger(ReactionsService.name);
+
+  constructor(private readonly scoringService: ScoringService) {}
 
   @OnEvent(DISCORD_EVENTS.reactionAdded)
   handleMessageReactionAdd(reaction: MessageReaction, user: User) {

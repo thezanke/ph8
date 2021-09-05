@@ -6,13 +6,13 @@ import { DISCORD_CLIENT } from './providers/discordClient.provider';
 
 @Injectable()
 export class DiscordService implements OnModuleInit {
+  private readonly logger = new Logger(DiscordService.name);
+
   constructor(
     @Inject(DISCORD_CLIENT)
     private readonly discordClient: Client,
     private readonly eventEmitter: EventEmitter2,
   ) {}
-
-  private readonly logger = new Logger(DiscordService.name);
 
   onModuleInit() {
     this.discordClient.on('error', this.logger.error.bind(this.logger));

@@ -4,9 +4,9 @@ import { ScoreRepository } from './score.repository';
 
 @Injectable()
 export class ScoringService {
-  constructor(private readonly scoreRepository: ScoreRepository) {}
-
   private readonly logger = new Logger(ScoringService.name);
+
+  constructor(private readonly scoreRepository: ScoreRepository) {}
 
   addScore(userId: Snowflake, amount: number) {
     this.logger.verbose(`Adding ${amount} to score for userId=${userId}`);

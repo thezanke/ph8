@@ -6,9 +6,9 @@ import { ScoringService } from './scoring/scoring.service';
 
 @Injectable()
 export class DigressionService {
-  constructor(private readonly scoringService: ScoringService) {}
-
   private readonly logger = new Logger(DigressionService.name);
+
+  constructor(private readonly scoringService: ScoringService) {}
 
   @OnEvent(DISCORD_EVENTS.messageCreate)
   handleMessage(message: Message) {

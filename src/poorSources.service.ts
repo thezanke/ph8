@@ -11,14 +11,14 @@ import { parseEnvStringList } from './helpers/parseEnvStringList';
 
 @Injectable()
 export class PoorSourcesService {
+  private readonly logger = new Logger(PoorSourcesService.name);
+  private readonly poorSourcesList = this.getPoorSourcesList();
+  private readonly replies = this.getReplies();
+
   constructor(
     private readonly scoringService: ScoringService,
     private readonly configService: ConfigService<EnvironmentVariables>,
   ) {}
-
-  private readonly logger = new Logger(PoorSourcesService.name);
-  private readonly poorSourcesList = this.getPoorSourcesList();
-  private readonly replies = this.getReplies();
 
   @OnEvent(DISCORD_EVENTS.messageCreate)
   handleMessage(message: Message) {
