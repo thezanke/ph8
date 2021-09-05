@@ -7,11 +7,7 @@ import { DISCORD_EVENTS } from './discord/constants';
 import { ScoringService } from './scoring/scoring.service';
 import { pickRandom } from './helpers/pickRandom';
 import { findHostnamesInString } from './helpers/findHostnamesInString';
-
-const parseEnvStringList = (envString: string) => {
-  const parsedList = envString.split(',').map((s) => s.trim());
-  return parsedList;
-};
+import { parseEnvStringList } from './helpers/parseEnvStringList';
 
 @Injectable()
 export class PoorSourcesService {
