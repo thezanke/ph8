@@ -48,6 +48,7 @@ export class CommandsService {
   }
 
   private logCommand(commandName: string, username: string, args: string[]) {
-    this.logger.log(`${username} executed ${commandName} command${args.length ? `, args: ${args.join(',')}` : ''}`);
+    this.logger.log(`${username} executed ${commandName} command`);
+    if (args.length) this.logger.log(`command args: ${args.join(',')}`);
   }
 }
