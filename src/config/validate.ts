@@ -16,17 +16,17 @@ enum Environment {
 }
 
 export class EnvironmentVariables {
-  @IsEnum(Environment)
-  NODE_ENV: Environment;
+  @IsString()
+  DISCORD_BOT_TOKEN: string;
 
   @IsNumber()
   HTTP_PORT: number;
 
   @IsString()
-  DISCORD_BOT_TOKEN: string;
-
-  @IsString()
   LOG_LEVELS: string;
+
+  @IsEnum(Environment)
+  NODE_ENV: Environment;
 
   @IsString()
   POOR_SOURCES: string;
