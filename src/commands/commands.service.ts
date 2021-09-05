@@ -26,7 +26,7 @@ export class CommandsService {
   }
 
   private determineIfCommand(messageContent: string) {
-    return new RegExp(`^!?${BOT_NAME},?`).test(messageContent);
+    return new RegExp(`^!?${BOT_NAME},?`, 'i').test(messageContent);
   }
 
   private getCommand(commandName = DEFAULT_COMMAND) {
@@ -36,7 +36,7 @@ export class CommandsService {
   private getCommandNameAndArgs(messageContent: string) {
     const [, commandName = DEFAULT_COMMAND, ...args] = messageContent.split(/ +/);
 
-    return [commandName, args] as [string, string[]];
+    return [commandName.toLocaleLowerCase(), args] as [string, string[]];
   }
 
   private async handleCommand(message: Message) {
