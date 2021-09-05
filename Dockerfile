@@ -1,17 +1,17 @@
-FROM ghcr.io/thezanke/base-images/deno:1.13.2 as base
-COPY src src
-ENV DENO_DIR=/home/deno/.cache
-RUN deno install --lock=deno-lock.json --lock-write src/main.ts
+ARG NODE_VERSION=16.8-alpine
 
-FROM base as development
-RUN deno install --allow-read --allow-run --allow-write -f --unstable https://deno.land/x/denon/denon.ts
-COPY scripts.json .
-CMD ["denon", "start"]
+FROM node:${NODE_VERSION} AS api-builder
+WORKDIR /app
+COPY package*.json tsconfig*.json /app/
+ENV NODE_ENV=development
+RUN npm ci
+COPY src /app/src
+RUN npm run build
 
-FROM ghcr.io/thezanke/base-images/deno:1.13.2 as production
-ENV DENO_DIR=/home/deno/.cache
-LABEL org.opencontainers.image.source https://github.com/thezanke/ph8
-COPY --from=base /home/deno/deno-lock.json ./
-COPY --from=base /home/deno/src src
-COPY --from=base /home/deno/.cache .cache
-CMD ["deno", "run", "-A", "--lock=deno-lock.json", "src/main.ts"]
+FROM node:${NODE_VERSION} AS api
+WORKDIR /app
+COPY --from=api-builder /app/package.json /app/package-lock.json /app/
+ENV NODE_ENV=production
+RUN npm ci
+COPY --from=api-builder /app/dist /app/dist
+CMD ["npm", "run", "start:prod"]

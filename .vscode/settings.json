@@ -1,4 +1,6 @@
 {
-  "deno.enable": true,
-  "deno.lint": true
+    "editor.formatOnSave": true,
+    "javascript.preferences.importModuleSpecifier": "relative",
+    "typescript.preferences.importModuleSpecifier": "relative"
+
 }

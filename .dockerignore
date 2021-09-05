@@ -1,5 +1,11 @@
-/data
-Dockerfile
-docker-compose.yml
-.vscode
+node_modules
 .env
+.log
+.git
+.vscode
+docker-compose.yml
+*ignore*
+dist
+build
+kustomize
+schema.gql
