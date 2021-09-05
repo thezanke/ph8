@@ -1,1 +1,1 @@
-export const pickRandom = (arr: any[]) => arr[Math.floor(Math.random() * arr.length)];
+export const pickRandom = (arr: unknown[]) => arr[Math.floor(Math.random() * arr.length)];

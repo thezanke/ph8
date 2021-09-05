@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { EventEmitterModule } from '@nestjs/event-emitter';
+
 import { CommandsModule } from './commands/commands.module';
 import { validate } from './config/validate';
 import { DigressionService } from './digression.service';

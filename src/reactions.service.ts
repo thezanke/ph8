@@ -1,6 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { OnEvent } from '@nestjs/event-emitter';
 import { MessageReaction, User } from 'discord.js';
+
 import { DISCORD_EVENTS } from './discord/constants';
 import { ScoringService } from './scoring/scoring.service';
 
@@ -44,6 +45,7 @@ export class ReactionsService {
     if (this.determineIfSelfReaction(author, user)) return;
 
     const value = this.getReactionValue(reaction.emoji.name);
+
     if (!value) return;
 
     this.logger.verbose(`${user.username} reacted to ${author.username} with ${reaction.emoji}`);
@@ -59,6 +61,7 @@ export class ReactionsService {
     if (this.determineIfSelfReaction(author, user)) return;
 
     const value = this.getReactionValue(`${reaction.emoji}`);
+
     if (!value) return;
 
     this.logger.verbose(`${user.username} unreacted to ${author.username} with ${reaction.emoji}`);

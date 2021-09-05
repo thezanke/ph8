@@ -1,6 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { OnEvent } from '@nestjs/event-emitter';
 import { Message } from 'discord.js';
+
 import { DISCORD_EVENTS } from '../discord/constants';
 import { Command } from './types';
 
@@ -34,13 +35,16 @@ export class CommandsService {
 
   private getCommandNameAndArgs(messageContent: string) {
     const [, commandName = DEFAULT_COMMAND, ...args] = messageContent.split(/ +/);
+
     return [commandName, args] as [string, string[]];
   }
 
   private async handleCommand(message: Message) {
     const [commandName, args] = this.getCommandNameAndArgs(message.content);
     const command = this.getCommand(commandName);
+
     if (!command) return;
+
     this.logCommand(command.commandName, message.author.username, args);
     await command.execute(message, ...args);
   }

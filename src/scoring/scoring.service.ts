@@ -1,5 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { Snowflake } from 'discord-api-types';
+
 import { ScoreRepository } from './score.repository';
 
 @Injectable()

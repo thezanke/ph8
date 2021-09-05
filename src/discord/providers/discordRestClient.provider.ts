@@ -1,5 +1,6 @@
 import { REST } from '@discordjs/rest';
 import { ConfigService } from '@nestjs/config';
+
 import { EnvironmentVariables } from '../../config/validate';
 
 const REST_API_VERSION = '9';

@@ -1,11 +1,11 @@
 import { Inject, Injectable, Logger } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { Snowflake } from 'discord-api-types';
-import { INITIAL_SCORES } from './initialScoresProvider';
-
 import * as fs from 'fs';
 import * as path from 'path';
+
 import { EnvironmentVariables } from '../config/validate';
-import { ConfigService } from '@nestjs/config';
+import { INITIAL_SCORES } from './initialScoresProvider';
 
 @Injectable()
 export class ScoreRepository {

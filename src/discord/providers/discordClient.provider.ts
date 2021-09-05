@@ -1,5 +1,6 @@
 import { ConfigService } from '@nestjs/config';
 import { Client, Intents } from 'discord.js';
+
 import { EnvironmentVariables } from '../../config/validate';
 
 export const DISCORD_CLIENT = 'DISCORD_CLIENT';

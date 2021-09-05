@@ -1,6 +1,7 @@
 import { Inject, Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { Client, Message, MessageReaction, User } from 'discord.js';
 import { EventEmitter2 } from 'eventemitter2';
+
 import { DISCORD_EVENTS } from './constants';
 import { DISCORD_CLIENT } from './providers/discordClient.provider';
 

@@ -1,6 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { OnEvent } from '@nestjs/event-emitter';
 import { Message } from 'discord.js';
+
 import { DISCORD_EVENTS } from './discord/constants';
 import { ScoringService } from './scoring/scoring.service';
 
@@ -13,6 +14,7 @@ export class DigressionService {
   @OnEvent(DISCORD_EVENTS.messageCreate)
   handleMessage(message: Message) {
     if (!this.determineIfDigression(message.content)) return;
+
     this.logger.verbose(`${message.author.username} has digressed`);
     this.handleDigression(message);
   }

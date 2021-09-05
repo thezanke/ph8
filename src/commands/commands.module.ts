@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
+
 import { ScoringModule } from '../scoring/scoring.module';
 import { ChitchatCommandService } from './chitchatCommand.service';
 import { CommandsService } from './commands.service';

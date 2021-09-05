@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
+
 import { initialScoresProvider } from './initialScoresProvider';
 import { ScoreRepository } from './score.repository';
 import { ScoringService } from './scoring.service';

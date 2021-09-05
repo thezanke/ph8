@@ -1,4 +1,1 @@
-export const parseEnvStringList = (envString: string) => {
-  const parsedList = envString.split(/,|\r?\n/).map((s) => s.trim());
-  return parsedList;
-};
+export const parseEnvStringList = (envString: string) => envString.split(/,|\r?\n/).map((s) => s.trim());
