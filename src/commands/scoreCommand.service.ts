@@ -22,7 +22,6 @@ export class ScoreCommandService implements Command {
 
   private getCommandUserIds(message: Message) {
     const userIds = [...message.mentions.users.keys(), ...message.mentions.roles.map((r) => r.tags?.botId)];
-    console.log(message.mentions.roles);
     if (!userIds.length) userIds.push(message.author.id);
     return userIds as Snowflake[];
   }
