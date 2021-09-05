@@ -1,11 +1,3 @@
-// Joi.object({
-//   NODE_ENV: Joi.string()
-//     .valid('development', 'production', 'test', 'provision')
-//     .default('development'),
-//   HTTP_PORT: Joi.number().required(),
-//   DISCORD_BOT_TOKEN: Joi.string().required(),
-// });
-
 import { plainToClass } from 'class-transformer';
 import { IsEnum, IsNumber, IsString, validateSync } from 'class-validator';
 
