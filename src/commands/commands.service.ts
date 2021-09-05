@@ -21,7 +21,7 @@ export class CommandsService {
 
   public registerCommand(command: Command) {
     this.commands[command.commandName] = command;
-    this.logger.log(`Command ${command.commandName} registered`);
+    this.logger.log(`"${command.commandName}" command registered`);
   }
 
   private determineIfCommand(messageContent: string) {
@@ -48,6 +48,6 @@ export class CommandsService {
   }
 
   private logCommand(commandName: string, username: string, args: string[]) {
-    this.logger.log(`${username} executed command ${commandName}${args.length ? `, args: ${args.join(',')}` : ''}`);
+    this.logger.log(`${username} executed ${commandName} command${args.length ? `, args: ${args.join(',')}` : ''}`);
   }
 }
