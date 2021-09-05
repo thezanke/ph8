@@ -1,4 +1,4 @@
-import { Inject, Injectable, Logger, OnModuleInit } from '@nestjs/common';
+import { Inject, Injectable, Logger } from '@nestjs/common';
 import { Client, Message, MessageReaction, User } from 'discord.js';
 import { EventEmitter2 } from 'eventemitter2';
 
@@ -6,16 +6,14 @@ import { DISCORD_EVENTS } from './constants';
 import { DISCORD_CLIENT } from './providers/discordClient.provider';
 
 @Injectable()
-export class DiscordService implements OnModuleInit {
+export class DiscordService {
   private readonly logger = new Logger(DiscordService.name);
 
   constructor(
     @Inject(DISCORD_CLIENT)
     private readonly discordClient: Client,
     private readonly eventEmitter: EventEmitter2,
-  ) {}
-
-  onModuleInit() {
+  ) {
     this.discordClient.on('error', this.logger.error.bind(this.logger));
     this.discordClient.on('debug', this.logger.debug.bind(this.logger));
     this.discordClient.on('messageCreate', this.handleMessageCreate);

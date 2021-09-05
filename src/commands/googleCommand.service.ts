@@ -19,7 +19,7 @@ export class GoogleCommandService implements CommandService {
     message.reply(`Ugh, you're so lazy...\nhttps://www.google.com/search?q=${searchPhrase}&btnI`);
   }
 
-  replyWithDefaultMessage(message: Message) {
+  private replyWithDefaultMessage(message: Message) {
     message.reply('Google what?');
   }
 }
