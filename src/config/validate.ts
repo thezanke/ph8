@@ -26,6 +26,9 @@ export class EnvironmentVariables {
   DISCORD_BOT_TOKEN: string;
 
   @IsString()
+  LOG_LEVELS: string;
+
+  @IsString()
   POOR_SOURCES: string;
 
   @IsString()
