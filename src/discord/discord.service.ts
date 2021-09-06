@@ -15,7 +15,7 @@ export class DiscordService {
     private readonly eventEmitter: EventEmitter2,
   ) {
     this.discordClient.on('error', this.logger.error.bind(this.logger));
-    this.discordClient.on('debug', this.logger.debug.bind(this.logger));
+    this.discordClient.on('debug', this.logger.verbose.bind(this.logger));
     this.discordClient.on('messageCreate', this.handleMessageCreate);
     this.discordClient.on('messageReactionAdd', this.handleMessageReactionAdd);
     this.discordClient.on('messageReactionRemove', this.handleMessageReactionRemove);

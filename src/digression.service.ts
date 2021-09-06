@@ -15,7 +15,7 @@ export class DigressionService {
   handleMessage(message: Message) {
     if (!this.determineIfDigression(message.content)) return;
 
-    this.logger.verbose(`${message.author.username} has digressed`);
+    this.logger.debug(`${message.author.username} has digressed`);
     this.handleDigression(message);
   }
 

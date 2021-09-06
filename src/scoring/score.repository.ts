@@ -34,7 +34,7 @@ export class ScoreRepository {
       if (err) {
         this.logger.error(err);
       } else {
-        this.logger.verbose('Scores written to file');
+        this.logger.debug('Scores written to file');
       }
     });
   }

@@ -27,7 +27,7 @@ export class PoorSourcesService {
 
     if (!poorSourceDomains.length) return;
 
-    this.logger.verbose(`${message.author.username} used poor source(s): ${poorSourceDomains.join(', ')}`);
+    this.logger.debug(`${message.author.username} used poor source(s): ${poorSourceDomains.join(', ')}`);
     this.handlePoorSources(message, poorSourceDomains.length);
   }
 

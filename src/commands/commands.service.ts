@@ -21,6 +21,11 @@ export class CommandsService {
   }
 
   public registerCommand(command: Command) {
+    if (this.commands[command.commandName]) {
+      this.logger.error(`${command.commandName} already registered.`)
+      return;
+    }
+
     this.commands[command.commandName] = command;
     this.logger.log(`"${command.commandName}" command registered`);
   }

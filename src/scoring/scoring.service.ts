@@ -10,7 +10,7 @@ export class ScoringService {
   constructor(private readonly scoreRepository: ScoreRepository) {}
 
   addScore(userId: Snowflake, amount: number) {
-    this.logger.verbose(`Adding ${amount} to score for userId=${userId}`);
+    this.logger.debug(`Adding ${amount} to score for userId=${userId}`);
 
     const prevScore = this.scoreRepository.getScore(userId);
     const newScore = prevScore + amount;
@@ -19,7 +19,7 @@ export class ScoringService {
   }
 
   removeScore(userId: Snowflake, amount: number) {
-    this.logger.verbose(`Removing ${amount} from score for userId=${userId}`);
+    this.logger.debug(`Removing ${amount} from score for userId=${userId}`);
 
     const prevScore = this.scoreRepository.getScore(userId);
     const newScore = prevScore - amount;
