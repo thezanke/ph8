@@ -12,6 +12,9 @@ export const ensureFile = (filePath): Promise<void> => {
 
       fs.writeFile(filePath, '', (err) => {
         if (err) return reject(err);
+
+        logger.debug(`${filePath} created`);
+
         return resolve();
       });
     });

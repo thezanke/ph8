@@ -22,7 +22,7 @@ export class CommandsService {
 
   public registerCommand(command: Command) {
     if (this.commands[command.commandName]) {
-      this.logger.error(`${command.commandName} already registered.`)
+      this.logger.error(`${command.commandName} already registered.`);
       return;
     }
 
