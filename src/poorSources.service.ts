@@ -13,7 +13,7 @@ import { ScoringService } from './scoring/scoring.service';
 @Injectable()
 export class PoorSourcesService {
   private readonly logger = new Logger(PoorSourcesService.name);
-  private readonly poorSourceHostnames = this.getPoorSourceHostnames();
+  private readonly poorSourceDomains = this.getPoorSourceDomainNames();
   private readonly replies = this.getReplies();
 
   constructor(
@@ -23,19 +23,19 @@ export class PoorSourcesService {
 
   @OnEvent(DISCORD_EVENTS.messageCreate)
   handleMessage(message: Message) {
-    const poorSources = this.findPoorSources(message.content);
+    const poorSourceDomains = this.findPoorSourceDomainsInMessageContent(message.content);
 
-    if (!poorSources.length) return;
+    if (!poorSourceDomains.length) return;
 
-    this.logger.verbose(`${message.author.username} used poor source(s): ${poorSources.join(', ')}`);
-    this.handlePoorSources(message, poorSources.length);
+    this.logger.verbose(`${message.author.username} used poor source(s): ${poorSourceDomains.join(', ')}`);
+    this.handlePoorSources(message, poorSourceDomains.length);
   }
 
-  private findPoorSources(messageContent: string) {
-    const messageDomainNames = findHostnamesInString(messageContent);
+  private findPoorSourceDomainsInMessageContent(messageContent: string) {
+    const contentHostnames = findHostnamesInString(messageContent);
 
-    return messageDomainNames.filter((messageDomainName) =>
-      this.poorSourceHostnames.some((hostname) => messageDomainName.endsWith(hostname)),
+    return this.poorSourceDomains.filter((poorSourceDomain) =>
+      contentHostnames.some((hostname) => hostname.endsWith(poorSourceDomain)),
     );
   }
 
@@ -44,7 +44,7 @@ export class PoorSourcesService {
     message.reply(pickRandom(this.replies) as string);
   }
 
-  private getPoorSourceHostnames() {
+  private getPoorSourceDomainNames() {
     return parseEnvStringList(this.configService.get('POOR_SOURCES', ''));
   }
 
