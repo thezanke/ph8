@@ -37,7 +37,7 @@ export class ReactionsService {
   constructor(private readonly scoringService: ScoringService) {}
 
   @OnEvent(DISCORD_EVENTS.reactionAdded)
-  handleMessageReactionAdd(reaction: MessageReaction, user: User) {
+  async handleMessageReactionAdd(reaction: MessageReaction, user: User) {
     const { author } = reaction.message;
 
     if (!author) return;
@@ -49,11 +49,11 @@ export class ReactionsService {
     if (!value) return;
 
     this.logger.debug(`${user.username} reacted to ${author.username} with ${reaction.emoji}`);
-    this.scoringService.addScore(author.id, value);
+    await this.scoringService.addScore(author.id, value);
   }
 
   @OnEvent(DISCORD_EVENTS.reactionRemoved)
-  handleMessageReactionRemove(reaction: MessageReaction, user: User) {
+  async handleMessageReactionRemove(reaction: MessageReaction, user: User) {
     const { author } = reaction.message;
 
     if (!author) return;
@@ -65,7 +65,7 @@ export class ReactionsService {
     if (!value) return;
 
     this.logger.debug(`${user.username} unreacted to ${author.username} with ${reaction.emoji}`);
-    this.scoringService.removeScore(author.id, value);
+    await this.scoringService.removeScore(author.id, value);
   }
 
   private getReactionValue(emojiName: string) {

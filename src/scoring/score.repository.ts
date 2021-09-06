@@ -5,6 +5,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 
 import { EnvironmentVariables } from '../config/validate';
+import { writeFile } from '../helpers/writeFile';
 import { INITIAL_SCORES } from './initialScoresProvider';
 
 @Injectable()
@@ -21,21 +22,14 @@ export class ScoreRepository {
     return this.scores[userId] ?? 0;
   }
 
-  updateScore(userId: Snowflake, score: number) {
+  async updateScore(userId: Snowflake, score: number) {
     this.scores[userId] = score;
-    this.writeScores();
+    await this.writeScores();
   }
 
-  writeScores() {
+  async writeScores() {
     const scoresJsonFilePath = path.resolve(this.configService.get('SCORES_JSON_FILE_PATH', ''));
     const scoresString = JSON.stringify(this.scores, null, 2);
-
-    fs.writeFile(scoresJsonFilePath, scoresString, (err) => {
-      if (err) {
-        this.logger.error(err);
-      } else {
-        this.logger.debug('Scores written to file');
-      }
-    });
+    await writeFile(scoresJsonFilePath, scoresString);
   }
 }
