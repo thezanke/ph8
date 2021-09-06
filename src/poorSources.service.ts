@@ -13,12 +13,12 @@ import { ScoringService } from './scoring/scoring.service';
 @Injectable()
 export class PoorSourcesService {
   private readonly logger = new Logger(PoorSourcesService.name);
-  private readonly poorSourcesList = this.getPoorSourcesList();
+  private readonly poorSourceHostnames = this.getPoorSourceHostnames();
   private readonly replies = this.getReplies();
 
   constructor(
-    private readonly scoringService: ScoringService,
     private readonly configService: ConfigService<EnvironmentVariables>,
+    private readonly scoringService: ScoringService,
   ) {}
 
   @OnEvent(DISCORD_EVENTS.messageCreate)
@@ -32,10 +32,10 @@ export class PoorSourcesService {
   }
 
   private findPoorSources(messageContent: string) {
-    const domainNames = findHostnamesInString(messageContent);
+    const messageDomainNames = findHostnamesInString(messageContent);
 
-    return domainNames.filter((domainName) =>
-      this.poorSourcesList.some((sourceDomainName) => domainName.endsWith(sourceDomainName)),
+    return messageDomainNames.filter((messageDomainName) =>
+      this.poorSourceHostnames.some((hostname) => messageDomainName.endsWith(hostname)),
     );
   }
 
@@ -44,7 +44,7 @@ export class PoorSourcesService {
     message.reply(pickRandom(this.replies) as string);
   }
 
-  private getPoorSourcesList() {
+  private getPoorSourceHostnames() {
     return parseEnvStringList(this.configService.get('POOR_SOURCES', ''));
   }
 
