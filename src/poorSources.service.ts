@@ -22,13 +22,13 @@ export class PoorSourcesService {
   ) {}
 
   @OnEvent(DISCORD_EVENTS.messageCreate)
-  handleMessage(message: Message) {
+  async handleMessage(message: Message) {
     const poorSourceDomains = this.findPoorSourceDomainsInMessageContent(message.content);
 
     if (!poorSourceDomains.length) return;
 
     this.logger.debug(`${message.author.username} used poor source(s): ${poorSourceDomains.join(', ')}`);
-    this.handlePoorSources(message, poorSourceDomains.length);
+    await this.handlePoorSources(message, poorSourceDomains.length);
   }
 
   private findPoorSourceDomainsInMessageContent(messageContent: string) {
@@ -39,9 +39,9 @@ export class PoorSourcesService {
     );
   }
 
-  private handlePoorSources(message: Message, count: number) {
-    this.scoringService.removeScore(message.author.id, 3 * count);
+  private async handlePoorSources(message: Message, count: number) {
     message.reply(pickRandom(this.replies) as string);
+    await this.scoringService.removeScore(message.author.id, 3 * count);
   }
 
   private getPoorSourceDomainNames() {
