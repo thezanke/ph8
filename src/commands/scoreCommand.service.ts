@@ -4,10 +4,10 @@ import { Snowflake } from 'discord-api-types';
 
 import { ScoringService } from '../scoring/scoring.service';
 import { CommandsService } from './commands.service';
-import { CommandService } from './types';
+import { Command } from './types';
 
 @Injectable()
-export class ScoreCommandService implements CommandService {
+export class ScoreCommandService implements Command {
   public commandName = 'score';
 
   constructor(private readonly scoringService: ScoringService, commandsService: CommandsService) {

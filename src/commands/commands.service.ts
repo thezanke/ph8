@@ -3,7 +3,7 @@ import { OnEvent } from '@nestjs/event-emitter';
 import { Message } from 'discord.js';
 
 import { DISCORD_EVENTS } from '../discord/constants';
-import { CommandService } from './types';
+import { Command } from './types';
 
 const BOT_NAME = 'ph8';
 const DEFAULT_COMMAND = 'chitchat';
@@ -12,7 +12,7 @@ const UNKNOWN_COMMAND = 'unknown';
 @Injectable()
 export class CommandsService {
   private readonly logger = new Logger(CommandsService.name);
-  private readonly commands: Record<string, CommandService> = {};
+  private readonly commands: Record<string, Command> = {};
 
   @OnEvent(DISCORD_EVENTS.messageCreate)
   public async handleMessage(message: Message) {
@@ -20,7 +20,7 @@ export class CommandsService {
     await this.handleCommand(message);
   }
 
-  public registerCommand(command: CommandService) {
+  public registerCommand(command: Command) {
     this.commands[command.commandName] = command;
     this.logger.log(`"${command.commandName}" command registered`);
   }

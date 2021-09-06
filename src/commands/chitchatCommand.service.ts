@@ -2,10 +2,10 @@ import { Injectable } from '@nestjs/common';
 import { Message } from 'discord.js';
 
 import { CommandsService } from './commands.service';
-import { CommandService } from './types';
+import { Command } from './types';
 
 @Injectable()
-export class ChitchatCommandService implements CommandService {
+export class ChitchatCommandService implements Command {
   public commandName = 'chitchat';
   public omitFromListing = true;
 
