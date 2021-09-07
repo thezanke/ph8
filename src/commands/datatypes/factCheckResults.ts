@@ -17,6 +17,6 @@ export type FactCheckClaim = {
 };
 
 export type FactCheckResults = {
-  claims: FactCheckClaim[];
-  nextPageToken: string;
+  claims?: FactCheckClaim[];
+  nextPageToken?: string;
 };
