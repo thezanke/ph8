@@ -1,4 +1,4 @@
-import { bold, hideLinkEmbed, hyperlink, italic } from '@discordjs/builders';
+import { bold, hideLinkEmbed } from '@discordjs/builders';
 import { HttpService } from '@nestjs/axios';
 import { Injectable } from '@nestjs/common';
 import { AxiosResponse } from '@nestjs/common/node_modules/axios';
@@ -33,6 +33,8 @@ export class FactCheckCommandService implements Command {
   }
 
   private buildResultsReplyMessage(results: FactCheckResults): string {
+    if (!results.claims.length) return "I couldn't find anything, sorry!";
+
     const lines: string[] = [];
 
     results.claims.slice(0, 5).forEach((claim) => {
