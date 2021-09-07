@@ -28,6 +28,9 @@ export class EnvironmentVariables {
 
   @IsString()
   SCORES_JSON_FILE_PATH: string;
+
+  @IsString()
+  GOOGLE_API_KEY: string;
 }
 
 export function validate(config: Record<string, unknown>) {
