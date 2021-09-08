@@ -26,7 +26,7 @@ export class FactCheckCommandService implements Command {
 
   public async execute(message: Message, ...args) {
     const queryString = args.length ? this.getQueryStringFromArgs(args) : await this.getQueryStringFromReply(message);
-    if (!queryString) return this.replyWithConfusion(message);
+    if (!queryString?.length) return this.replyWithConfusion(message);
 
     const { data } = await this.fetchFactCheck(queryString as string);
     if (!data.claims?.length) return this.replyWithNotFound(message);
@@ -41,21 +41,17 @@ export class FactCheckCommandService implements Command {
     const embeds: MessageEmbed[] = [];
 
     for (const claim of this.getClaimsForEmbed(claims)) {
-      if (claim.claimReview.length) {
-        const embed = new MessageEmbed();
+      const lines = [`${bold('Claim:')} ${claim.text}`];
 
-        const lines = [`${bold('Claim:')} ${claim.text}`];
-
-        for (const claimReview of claim.claimReview) {
-          lines.push(
-            `${bold('Verdict:')} ${claimReview.textualRating}`,
-            `${bold('Source:')} ${hyperlink(claimReview.title || claimReview.url, claimReview.url)}`,
-          );
-        }
-
-        embed.setDescription(lines.join('\n'));
-        embeds.push(embed);
+      for (const claimReview of claim.claimReview) {
+        lines.push(
+          `${bold('Verdict:')} ${claimReview.textualRating}`,
+          `${bold('Source:')} ${hyperlink(claimReview.title || claimReview.url, claimReview.url)}`,
+        );
       }
+
+      const embed = new MessageEmbed({ description: lines.join('\n') });
+      embeds.push(embed);
     }
 
     return embeds;
@@ -83,7 +79,8 @@ export class FactCheckCommandService implements Command {
 
   private async getQueryStringFromReply(message: Message) {
     const reply = await message.fetchReference();
-    if (!reply?.content.length) return false;
+    if (!reply?.content.length) return;
+
     return reply.content;
   }
 
