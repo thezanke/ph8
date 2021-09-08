@@ -26,6 +26,7 @@ export class FactCheckCommandService implements Command {
 
   public async execute(message: Message, ...args) {
     const queryString = this.getQueryString(args);
+
     if (!queryString.length) return this.replyWithConfusion(message);
 
     const { data: results } = await this.fetchFactCheck(queryString);
@@ -42,6 +43,7 @@ export class FactCheckCommandService implements Command {
       lines.push(claim.text);
       claim.claimReview.forEach((claimReview) => {
         if (claimReview.languageCode !== 'en') return;
+
         lines.push(`${bold(`${claimReview.textualRating}`)} - ${hideLinkEmbed(claimReview.url)}`, '');
       });
     });
