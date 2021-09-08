@@ -2,5 +2,7 @@
   "editor.formatOnSave": true,
   "javascript.preferences.importModuleSpecifier": "relative",
   "typescript.preferences.importModuleSpecifier": "relative",
-  "editor.foldingImportsByDefault": true
+  "editor.foldingImportsByDefault": true,
+  "eslint.format.enable": true,
+  "editor.defaultFormatter": "dbaeumer.vscode-eslint"
 }
