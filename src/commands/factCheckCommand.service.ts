@@ -1,6 +1,6 @@
 import { bold, hideLinkEmbed } from '@discordjs/builders';
 import { HttpService } from '@nestjs/axios';
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { AxiosResponse } from '@nestjs/common/node_modules/axios';
 import { ConfigService } from '@nestjs/config';
 import { Message } from 'discord.js';
@@ -23,13 +23,10 @@ export class FactCheckCommandService implements Command {
 
   public commandName = 'factcheck';
   private apiKey = this.configService.get('GOOGLE_API_KEY', '');
-  private logger = new Logger(FactCheckCommandService.name);
 
   public async execute(message: Message, ...args) {
     const queryString = this.getQueryString(args);
     if (!queryString.length) return this.replyWithConfusion(message);
-
-    this.logger.debug(`${message.author.username} fact checked "${queryString}"`);
 
     const { data: results } = await this.fetchFactCheck(queryString);
     const replyMessage = this.buildResultsReplyMessage(results);
