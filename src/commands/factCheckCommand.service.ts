@@ -25,10 +25,10 @@ export class FactCheckCommandService implements Command {
   private apiKey = this.configService.get('GOOGLE_API_KEY', '');
 
   public async execute(message: Message, ...args) {
-    const queryString = this.getQueryString(args);
-    if (!queryString.length) return this.replyWithConfusion(message);
+    const queryString = args.length ? this.getQueryStringFromArgs(args) : await this.getQueryStringFromReply(message);
+    if (!queryString) return this.replyWithConfusion(message);
 
-    const { data } = await this.fetchFactCheck(queryString);
+    const { data } = await this.fetchFactCheck(queryString as string);
     if (!data.claims?.length) return this.replyWithNotFound(message);
 
     const embeds = this.buildFactCheckClaimEmbeds(data.claims);
@@ -79,7 +79,13 @@ export class FactCheckCommandService implements Command {
     message.reply("Sorry, I couldn't find anything... :(");
   }
 
-  private getQueryString = (parts: string[]) => parts.join(' ').trim();
+  private getQueryStringFromArgs = (parts: string[]) => parts.join(' ').trim();
+
+  private async getQueryStringFromReply(message: Message) {
+    const reply = await message.fetchReference();
+    if (!reply?.content.length) return false;
+    return reply.content;
+  }
 
   private fetchFactCheck(query: string): Promise<AxiosResponse<FactCheckResults>> {
     return firstValueFrom(
