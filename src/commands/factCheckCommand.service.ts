@@ -85,7 +85,6 @@ export class FactCheckCommandService implements Command {
   private async getQueryStringFromReply(message: Message) {
     const reply = await message.fetchReference();
     if (!reply?.content.length) return;
-
     return reply.content;
   }
 
