@@ -21,11 +21,11 @@ export class FactCheckCommandService implements Command {
     commandsService.registerCommand(this);
   }
 
-  public commandName = 'factcheck';
-  private apiKey = this.configService.get('GOOGLE_API_KEY', '');
+  public readonly commandName = 'factcheck';
+  private readonly apiKey = this.configService.get('GOOGLE_API_KEY', '');
 
   public async execute(message: Message, ...args) {
-    const queryString = args.length ? this.getQueryStringFromArgs(args) : await this.getQueryStringFromReply(message);
+    const queryString = await this.getQueryString(message, args);
     if (!queryString?.length) return this.replyWithConfusion(message);
 
     const { data } = await this.fetchFactCheck(queryString as string);
@@ -57,6 +57,14 @@ export class FactCheckCommandService implements Command {
     return embeds;
   }
 
+  private fetchFactCheck(query: string): Promise<AxiosResponse<FactCheckResults>> {
+    return firstValueFrom(
+      this.httpService.get(`https://factchecktools.googleapis.com/v1alpha1/claims:search`, {
+        params: { query, key: this.apiKey },
+      }),
+    );
+  }
+
   private getClaimsForEmbed(claims: FactCheckClaim[]) {
     return claims
       .map((claim) => {
@@ -67,12 +75,9 @@ export class FactCheckCommandService implements Command {
       .slice(0, 10);
   }
 
-  private replyWithConfusion(message: Message) {
-    message.reply("I'm not sure what you want me to check...");
-  }
-
-  private replyWithNotFound(message: Message) {
-    message.reply("Sorry, I couldn't find anything... :(");
+  private getQueryString(message: Message, args: string[]) {
+    if (args.length) return this.getQueryStringFromArgs(args);
+    return this.getQueryStringFromReply(message);
   }
 
   private getQueryStringFromArgs = (parts: string[]) => parts.join(' ').trim();
@@ -84,11 +89,11 @@ export class FactCheckCommandService implements Command {
     return reply.content;
   }
 
-  private fetchFactCheck(query: string): Promise<AxiosResponse<FactCheckResults>> {
-    return firstValueFrom(
-      this.httpService.get(`https://factchecktools.googleapis.com/v1alpha1/claims:search`, {
-        params: { query, key: this.apiKey },
-      }),
-    );
+  private replyWithConfusion(message: Message) {
+    message.reply("I'm not sure what you want me to check...");
+  }
+
+  private replyWithNotFound(message: Message) {
+    message.reply("Sorry, I couldn't find anything... :(");
   }
 }
