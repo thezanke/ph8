@@ -6,7 +6,7 @@ import { DISCORD_EVENTS } from '../discord/constants';
 import { DiscordService } from '../discord/discord.service';
 import { Command } from './types';
 
-const BOT_NAME = 'ph8';
+const TRIGGER = '!?ph8';
 const DEFAULT_COMMAND = 'chitchat';
 const UNKNOWN_COMMAND = 'unknown';
 
@@ -33,17 +33,19 @@ export class CommandsService {
     this.logger.log(`"${command.commandName}" command registered`);
   }
 
-  private determineIfCommand(messageContent: string) {
-    if (
-      this.discordService.userId &&
-      (messageContent.startsWith(Formatters.memberNicknameMention(this.discordService.userId)) ||
-        messageContent.startsWith(Formatters.userMention(this.discordService.userId)) ||
-        messageContent.startsWith(Formatters.roleMention(this.discordService.userId)))
-    ) {
-      return true;
-    }
+  private checkIfStringStartsWithMention(messageContent: string) {
+    if (!this.discordService.userId) return;
 
-    return new RegExp(`^:!?${BOT_NAME},?`, 'i').test(messageContent);
+    return (
+      messageContent.startsWith(Formatters.memberNicknameMention(this.discordService.userId)) ||
+      messageContent.startsWith(Formatters.userMention(this.discordService.userId)) ||
+      messageContent.startsWith(Formatters.roleMention(this.discordService.userId))
+    );
+  }
+
+  private determineIfCommand(messageContent: string) {
+    if (this.checkIfStringStartsWithMention(messageContent)) return true;
+    return new RegExp(`^${TRIGGER},?`, 'i').test(messageContent);
   }
 
   private getCommand(commandName = DEFAULT_COMMAND) {
