@@ -1,8 +1,9 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { OnEvent } from '@nestjs/event-emitter';
-import { Message } from 'discord.js';
+import { Formatters, Message } from 'discord.js';
 
 import { DISCORD_EVENTS } from '../discord/constants';
+import { DiscordService } from '../discord/discord.service';
 import { Command } from './types';
 
 const BOT_NAME = 'ph8';
@@ -13,6 +14,8 @@ const UNKNOWN_COMMAND = 'unknown';
 export class CommandsService {
   private readonly logger = new Logger(CommandsService.name);
   private readonly commands: Record<string, Command> = {};
+
+  constructor(private readonly discordService: DiscordService) {}
 
   @OnEvent(DISCORD_EVENTS.messageCreate)
   public async handleMessage(message: Message) {
@@ -31,7 +34,16 @@ export class CommandsService {
   }
 
   private determineIfCommand(messageContent: string) {
-    return new RegExp(`^!?${BOT_NAME},?`, 'i').test(messageContent);
+    if (
+      this.discordService.userId &&
+      (messageContent.startsWith(Formatters.memberNicknameMention(this.discordService.userId)) ||
+        messageContent.startsWith(Formatters.userMention(this.discordService.userId)) ||
+        messageContent.startsWith(Formatters.roleMention(this.discordService.userId)))
+    ) {
+      return true;
+    }
+
+    return new RegExp(`^:!?${BOT_NAME},?`, 'i').test(messageContent);
   }
 
   private getCommand(commandName = DEFAULT_COMMAND) {

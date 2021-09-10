@@ -23,6 +23,10 @@ export class DiscordService {
     this.discordClient.on('warn', this.logger.warn.bind(this.logger));
   }
 
+  public get userId() {
+    return this.discordClient.user?.id;
+  }
+
   private determineIfOwnMessage(message: Message) {
     return message.author.id === this.discordClient.user?.id;
   }
