@@ -1,5 +1,11 @@
 import { plainToClass } from 'class-transformer';
-import { IsEnum, IsNumber, IsString, validateSync } from 'class-validator';
+import {
+  IsBoolean,
+  IsEnum,
+  IsNumber,
+  IsString,
+  validateSync,
+} from 'class-validator';
 
 enum Environment {
   Development = 'development',
@@ -31,6 +37,18 @@ export class EnvironmentVariables {
 
   @IsString()
   GOOGLE_API_KEY: string;
+
+  @IsBoolean()
+  ENABLE_GPT3: boolean;
+
+  @IsString()
+  GPT3_API_SECRET?: string;
+
+  @IsString()
+  GPT3_API_BASE_URL?: string;
+
+  @IsString()
+  GPT3_STARTING_PROMPT?: string;
 }
 
 export function validate(config: Record<string, unknown>) {
