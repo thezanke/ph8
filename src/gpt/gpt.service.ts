@@ -37,7 +37,7 @@ export class GptService {
 
   private defaultCompletionOptions = {
     temperature: 0.9,
-    max_tokens: 150,
+    max_tokens: 75,
     top_p: 1,
     frequency_penalty: 0,
     presence_penalty: 0.6,
