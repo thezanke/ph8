@@ -23,11 +23,17 @@ export class PoorSourcesService {
 
   @OnEvent(DISCORD_EVENTS.messageCreate)
   async handleMessage(message: Message) {
-    const poorSourceDomains = this.findPoorSourceDomainsInMessageContent(message.content);
+    this.logger.debug('testing', 'this', 'logging');
+    const poorSourceDomains = this.findPoorSourceDomainsInMessageContent(
+      message.content,
+    );
 
     if (!poorSourceDomains.length) return;
 
-    this.logger.debug(`${message.author.username} used poor source(s): ${poorSourceDomains.join(', ')}`);
+    const username = message.author.username;
+    const sourcesList = poorSourceDomains.join(', ');
+    this.logger.debug(`${username} used poor source(s): ${sourcesList}`);
+
     await this.handlePoorSources(message, poorSourceDomains.length);
   }
 
@@ -49,6 +55,8 @@ export class PoorSourcesService {
   }
 
   private getReplies() {
-    return parseEnvStringList(this.configService.get('POOR_SOURCE_REPLIES', ''));
+    return parseEnvStringList(
+      this.configService.get('POOR_SOURCE_REPLIES', ''),
+    );
   }
 }

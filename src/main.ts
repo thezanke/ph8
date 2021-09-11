@@ -8,9 +8,12 @@ import { parseEnvStringList } from './helpers/parseEnvStringList';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
-  const configService: ConfigService<EnvironmentVariables> = app.get(ConfigService);
+  const configService: ConfigService<EnvironmentVariables> =
+    app.get(ConfigService);
 
-  const logLevels = parseEnvStringList(configService.get('LOG_LEVELS', '')) as LogLevel[];
+  const logLevels = parseEnvStringList(
+    configService.get('LOG_LEVELS', ''),
+  ) as LogLevel[];
   app.useLogger(logLevels);
 
   const port = configService.get('HTTP_PORT');

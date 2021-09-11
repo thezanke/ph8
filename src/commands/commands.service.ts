@@ -37,9 +37,15 @@ export class CommandsService {
     if (!this.discordService.userId) return;
 
     return (
-      messageContent.startsWith(Formatters.memberNicknameMention(this.discordService.userId)) ||
-      messageContent.startsWith(Formatters.userMention(this.discordService.userId)) ||
-      messageContent.startsWith(Formatters.roleMention(this.discordService.userId))
+      messageContent.startsWith(
+        Formatters.memberNicknameMention(this.discordService.userId),
+      ) ||
+      messageContent.startsWith(
+        Formatters.userMention(this.discordService.userId),
+      ) ||
+      messageContent.startsWith(
+        Formatters.roleMention(this.discordService.userId),
+      )
     );
   }
 
@@ -53,28 +59,30 @@ export class CommandsService {
   }
 
   private getCommandNameAndArgs(messageContent: string) {
-    const [, commandName = DEFAULT_COMMAND, ...args] = messageContent.split(/ +/);
+    const parts = messageContent.split(/ +/);
+    const [, commandName = DEFAULT_COMMAND, ...args] = parts;
 
     return [commandName.toLocaleLowerCase(), args] as [string, string[]];
   }
 
   private async handleCommand(message: Message) {
     const [commandName, args] = this.getCommandNameAndArgs(message.content);
-
-    if (commandName === 'commands') return this.replyWithCommandsList(message);
+    if (commandName === 'commands') return this.replyWithCommandList(message);
 
     const command = this.getCommand(commandName);
-
     if (!command) return;
 
     this.logCommand(command.commandName, message.author.username, args);
     await command.execute(message, ...args);
   }
 
-  private replyWithCommandsList(message: Message) {
-    const commands = Object.values(this.commands).filter((cmd) => !cmd.omitFromListing);
-    const commandNames = commands.map((cmd) => cmd.commandName);
-    message.reply(`Available commands: ${commandNames.join(', ')}.`);
+  private replyWithCommandList(message: Message) {
+    const commandListString = Object.values(this.commands)
+      .filter((cmd) => !cmd.omitFromListing)
+      .map((cmd) => cmd.commandName)
+      .join(', ');
+
+    message.reply(`Available commands: ${commandListString}.`);
   }
 
   private logCommand(commandName: string, username: string, args: string[]) {

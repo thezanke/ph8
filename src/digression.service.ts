@@ -24,7 +24,9 @@ export class DigressionService {
   }
 
   private async handleDigression(message: Message) {
-    message.reply("You've digressed? Are you sure?\nhttps://www.google.com/search?q=digress");
+    message.reply(
+      "You've digressed? Are you sure?\nhttps://www.google.com/search?q=digress",
+    );
     await this.scoringService.removeScore(message.author.id, 1);
   }
 }

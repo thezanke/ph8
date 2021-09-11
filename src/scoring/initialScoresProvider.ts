@@ -10,7 +10,9 @@ export const INITIAL_SCORES = 'INITIAL_SCORES';
 export const initialScoresProvider = {
   provide: INITIAL_SCORES,
   async useFactory(configService: ConfigService<EnvironmentVariables>) {
-    const scoresJsonFilePath = path.resolve(configService.get('SCORES_JSON_FILE_PATH', ''));
+    const scoresJsonFilePath = path.resolve(
+      configService.get('SCORES_JSON_FILE_PATH', ''),
+    );
 
     await ensureFile(scoresJsonFilePath);
     const fileStringData = await readFile(scoresJsonFilePath);

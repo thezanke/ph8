@@ -18,7 +18,10 @@ export class DiscordService {
     this.discordClient.on('debug', this.logger.verbose.bind(this.logger));
     this.discordClient.on('messageCreate', this.handleMessageCreate);
     this.discordClient.on('messageReactionAdd', this.handleMessageReactionAdd);
-    this.discordClient.on('messageReactionRemove', this.handleMessageReactionRemove);
+    this.discordClient.on(
+      'messageReactionRemove',
+      this.handleMessageReactionRemove,
+    );
     this.discordClient.on('ready', this.handleReady);
     this.discordClient.on('warn', this.logger.warn.bind(this.logger));
   }
@@ -36,11 +39,17 @@ export class DiscordService {
     this.eventEmitter.emit(DISCORD_EVENTS.messageCreate, message);
   };
 
-  private handleMessageReactionAdd = async (reaction: MessageReaction, user: User) => {
+  private handleMessageReactionAdd = async (
+    reaction: MessageReaction,
+    user: User,
+  ) => {
     this.eventEmitter.emit(DISCORD_EVENTS.reactionAdded, reaction, user);
   };
 
-  private handleMessageReactionRemove = async (reaction: MessageReaction, user: User) => {
+  private handleMessageReactionRemove = async (
+    reaction: MessageReaction,
+    user: User,
+  ) => {
     this.eventEmitter.emit(DISCORD_EVENTS.reactionRemoved, reaction, user);
   };
 

@@ -10,7 +10,10 @@ import { Command } from './types';
 export class ScoreCommandService implements Command {
   public commandName = 'score';
 
-  constructor(private readonly scoringService: ScoringService, commandsService: CommandsService) {
+  constructor(
+    private readonly scoringService: ScoringService,
+    commandsService: CommandsService,
+  ) {
     commandsService.registerCommand(this);
   }
 
@@ -24,7 +27,10 @@ export class ScoreCommandService implements Command {
   }
 
   private getCommandUserIds(message: Message) {
-    const userIds = [...message.mentions.users.keys(), ...message.mentions.roles.map((r) => r.tags?.botId)];
+    const userIds = [
+      ...message.mentions.users.keys(),
+      ...message.mentions.roles.map((r) => r.tags?.botId),
+    ];
     if (!userIds.length) userIds.push(message.author.id);
 
     return userIds as Snowflake[];

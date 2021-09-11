@@ -48,7 +48,9 @@ export class ReactionsService {
 
     if (!value) return;
 
-    this.logger.debug(`${user.username} reacted to ${author.username} with ${reaction.emoji}`);
+    this.logger.debug(
+      `${user.username} reacted to ${author.username} with ${reaction.emoji}`,
+    );
     await this.scoringService.addScore(author.id, value);
   }
 
@@ -64,7 +66,9 @@ export class ReactionsService {
 
     if (!value) return;
 
-    this.logger.debug(`${user.username} unreacted to ${author.username} with ${reaction.emoji}`);
+    this.logger.debug(
+      `${user.username} unreacted to ${author.username} with ${reaction.emoji}`,
+    );
     await this.scoringService.removeScore(author.id, value);
   }
 

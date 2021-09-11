@@ -8,7 +8,11 @@ import { firstValueFrom } from 'rxjs';
 
 import { EnvironmentVariables } from '../config/validate';
 import { CommandsService } from './commands.service';
-import { FactCheckClaim, FactCheckResults } from './datatypes/factCheckResults';
+import {
+  FactCheckClaim,
+  FactCheckClaimReview,
+  FactCheckResults,
+} from './datatypes/factCheckResults';
 import { Command } from './types';
 
 @Injectable()
@@ -46,7 +50,10 @@ export class FactCheckCommandService implements Command {
       for (const claimReview of claim.claimReview) {
         lines.push(
           `${bold('Verdict:')} ${claimReview.textualRating}`,
-          `${bold('Source:')} ${hyperlink(claimReview.title || claimReview.url, claimReview.url)}`,
+          `${bold('Source:')} ${hyperlink(
+            claimReview.title || claimReview.url,
+            claimReview.url,
+          )}`,
         );
       }
 
@@ -57,34 +64,56 @@ export class FactCheckCommandService implements Command {
     return embeds;
   }
 
-  private fetchFactCheck(query: string): Promise<AxiosResponse<FactCheckResults>> {
+  private fetchFactCheck(
+    query: string,
+  ): Promise<AxiosResponse<FactCheckResults>> {
+    const options = { params: { query, key: this.apiKey } };
+
     return firstValueFrom(
-      this.httpService.get(`https://factchecktools.googleapis.com/v1alpha1/claims:search`, {
-        params: { query, key: this.apiKey },
-      }),
+      this.httpService.get(
+        `https://factchecktools.googleapis.com/v1alpha1/claims:search`,
+        options,
+      ),
     );
+  }
+
+  private filterReviewsForEmbed = (review: FactCheckClaimReview) => {
+    return review.languageCode === 'en';
+  };
+
+  private filterClaimsForEmbed = (claim: FactCheckClaim) => {
+    return claim.claimReview.length > 0;
+  };
+
+  private mapClaimForEmbed(claim: FactCheckClaim): FactCheckClaim {
+    return {
+      ...claim,
+      claimReview: claim.claimReview.filter(this.filterReviewsForEmbed),
+    };
   }
 
   private getClaimsForEmbed(claims: FactCheckClaim[]) {
     return claims
-      .map((claim) => {
-        claim.claimReview = claim.claimReview.filter((cr) => cr.languageCode === 'en');
-        return claim;
-      })
-      .filter((claim) => claim.claimReview.length)
+      .map(this.mapClaimForEmbed)
+      .filter(this.filterClaimsForEmbed)
       .slice(0, 10);
   }
 
   private getQueryString(message: Message, args: string[]) {
     if (args.length) return this.getQueryStringFromArgs(args);
+
     return this.getQueryStringFromReply(message);
   }
 
-  private getQueryStringFromArgs = (parts: string[]) => parts.join(' ').trim();
+  private getQueryStringFromArgs = (parts: string[]) => {
+    return parts.join(' ').trim();
+  };
 
   private async getQueryStringFromReply(message: Message) {
     const reply = await message.fetchReference();
+
     if (!reply?.content.length) return;
+
     return reply.content;
   }
 

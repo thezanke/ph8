@@ -27,7 +27,8 @@ export class ScoreRepository {
   }
 
   async writeScores() {
-    const scoresJsonFilePath = path.resolve(this.configService.get('SCORES_JSON_FILE_PATH', ''));
+    const rawFilePath = this.configService.get('SCORES_JSON_FILE_PATH');
+    const scoresJsonFilePath = path.resolve(rawFilePath);
     const scoresString = JSON.stringify(this.scores, null, 2);
     await writeFile(scoresJsonFilePath, scoresString);
   }
