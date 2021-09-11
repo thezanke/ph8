@@ -58,7 +58,7 @@ export class ChitchatCommandService implements Command {
 
     let lastMessage = message;
 
-    while (lastMessage.reference) {
+    while (messageHistory.length < 5 && lastMessage.reference) {
       lastMessage = await lastMessage.fetchReference();
       const wasAuthor = lastMessage.author.id === this.discordService.userId;
       const userPrompt = wasAuthor
