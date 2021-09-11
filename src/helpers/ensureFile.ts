@@ -1,22 +1,7 @@
-import { Logger } from '@nestjs/common';
-import * as fs from 'fs';
+import { checkIfFileExists } from './checkIfFileExists';
+import { writeFile } from './writeFile';
 
-const logger = new Logger('ensureFile');
-
-export const ensureFile = (filePath): Promise<void> => {
-  return new Promise((resolve, reject) => {
-    logger.debug(`Ensuring file ${filePath} exists`);
-    fs.stat(filePath, (err) => {
-      if (!err) return resolve();
-      if (err.code !== 'ENOENT') return reject(err);
-
-      fs.writeFile(filePath, '', (err) => {
-        if (err) return reject(err);
-
-        logger.debug(`${filePath} created`);
-
-        return resolve();
-      });
-    });
-  });
+export const ensureFile = async (filePath): Promise<void> => {
+  const fileExists = await checkIfFileExists(filePath);
+  if (!fileExists) await writeFile(filePath, '');
 };
