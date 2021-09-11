@@ -8,7 +8,7 @@ import { Command } from './types';
 
 const TRIGGER = '!?ph8';
 const DEFAULT_COMMAND = 'chitchat';
-const UNKNOWN_COMMAND = 'unknown';
+const UNKNOWN_COMMAND = 'chitchat';
 
 @Injectable()
 export class CommandsService {

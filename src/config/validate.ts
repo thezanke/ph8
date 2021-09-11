@@ -49,6 +49,12 @@ export class EnvironmentVariables {
 
   @IsString()
   GPT3_STARTING_PROMPT?: string;
+
+  @IsString()
+  GPT3_BOT_PROMPT?: string;
+
+  @IsString()
+  GPT3_HUMAN_PROMPT?: string;
 }
 
 export function validate(config: Record<string, unknown>) {

@@ -19,7 +19,7 @@ import { GptService } from './gpt.service';
           baseURL,
           headers: {
             'Content-Type': 'application/json',
-            Authorization: `Bearer: ${apiSecret}`,
+            Authorization: `Bearer ${apiSecret}`,
           },
         };
       },

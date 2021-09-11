@@ -23,7 +23,6 @@ export class PoorSourcesService {
 
   @OnEvent(DISCORD_EVENTS.messageCreate)
   async handleMessage(message: Message) {
-    this.logger.debug('testing', 'this', 'logging');
     const poorSourceDomains = this.findPoorSourceDomainsInMessageContent(
       message.content,
     );
