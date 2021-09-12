@@ -1,35 +1,50 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { OnEvent } from '@nestjs/event-emitter';
 import { Message } from 'discord.js';
 
+import { EnvironmentVariables } from '../config/validate';
 import { DISCORD_EVENTS } from '../discord/constants';
 import { DiscordService } from '../discord/discord.service';
-import { GptService } from '../gpt/gpt.service';
+import { CompletionResponse, GptService } from '../gpt/gpt.service';
 import { CommandsService } from './commands.service';
 import { Command } from './types';
 
+const MESSAGE_CONTEXT_LIMIT = 10;
+
 @Injectable()
 export class ChitchatCommandService implements Command {
-  public commandName = 'chitchat';
-  public omitFromListing = true;
-
   constructor(
     commandsService: CommandsService,
     private readonly gptService: GptService,
     private readonly discordService: DiscordService,
+    private readonly configService: ConfigService<EnvironmentVariables>,
   ) {
     commandsService.registerCommand(this);
   }
 
+  public commandName = 'chitchat';
+  public omitFromListing = true;
+
+  private readonly logger = new Logger(ChitchatCommandService.name);
+
   @OnEvent(DISCORD_EVENTS.messageCreate)
   async handleMessage(message: Message) {
     if (!message.reference) return;
+
     const lastMessage = await message.fetchReference();
+
     if (lastMessage.author.id !== this.discordService.userId) return;
+
     this.execute(message);
   }
 
   public async execute(message: Message) {
+    if (!this.configService.get('ENABLE_GPT3', false)) {
+      message.reply(`what's up bud?`);
+      return;
+    }
+
     const messageParts = message.cleanContent.split(' ');
     const [, ...promptWords] = messageParts;
     const prompt = [
@@ -40,7 +55,15 @@ export class ChitchatCommandService implements Command {
 
     const response = await this.gptService.getCompletion(prompt);
 
-    message.reply(response.data?.choices[0]?.text ?? '??');
+    message.reply(this.getCompletionResponseMessage(response.data));
+  }
+
+  private getCompletionResponseMessage(response: CompletionResponse) {
+    if (!response.choices.length) return '??';
+
+    const responseMessageChoice = response?.choices[0]?.text;
+
+    return responseMessageChoice.replace('@', '').trim();
   }
 
   private async getPromptMessageContext(message: Message) {
@@ -58,10 +81,14 @@ export class ChitchatCommandService implements Command {
 
     let lastMessage = message;
 
-    while (messageHistory.length < 5 && lastMessage.reference) {
+    while (
+      messageHistory.length < MESSAGE_CONTEXT_LIMIT &&
+      lastMessage.reference
+    ) {
       lastMessage = await lastMessage.fetchReference();
-      const wasAuthor = lastMessage.author.id === this.discordService.userId;
-      const userPrompt = wasAuthor
+
+      const isBotAuthor = lastMessage.author.id === this.discordService.userId;
+      const userPrompt = isBotAuthor
         ? this.gptService.botPrompt
         : this.gptService.humanPrompt;
 
