@@ -11,7 +11,7 @@ export class DiscordService {
 
   constructor(
     @Inject(DISCORD_CLIENT)
-    public readonly discordClient: Client,
+    private readonly discordClient: Client,
     private readonly eventEmitter: EventEmitter2,
   ) {
     this.discordClient.on('error', this.logger.error.bind(this.logger));
