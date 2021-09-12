@@ -67,7 +67,7 @@ export class ChitchatCommandService implements Command {
         .filter(Boolean)
         .join('\n');
 
-      this.logger.debug('Requesting GPT3 Completion:\n ' + prompt);
+      this.logger.debug('Requesting GPT3 Completion:\n' + prompt);
 
       const response = await this.gptService.getCompletion(prompt, [
         '/n',
@@ -77,7 +77,7 @@ export class ChitchatCommandService implements Command {
       ]);
 
       const responseMessage = this.getCompletionResponseMessage(response.data);
-      this.logger.debug('GPT3 Response:\n ' + responseMessage);
+      this.logger.debug('GPT3 Response:\n' + responseMessage);
 
       message.reply(responseMessage);
     } catch (e) {
