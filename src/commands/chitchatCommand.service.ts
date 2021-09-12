@@ -73,6 +73,7 @@ export class ChitchatCommandService implements Command {
     const promptMessageHistory = await this.buildPromptMessageHistory(message);
     const prompt = [
       this.gptService.startingPrompt,
+      '',
       ...promptMessageHistory,
     ].join('\n');
 
