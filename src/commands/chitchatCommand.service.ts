@@ -79,7 +79,8 @@ export class ChitchatCommandService implements Command {
       const responseMessage = this.getCompletionResponseMessage(response.data);
       this.logger.debug('GPT3 Response:\n' + responseMessage);
 
-      const [finalResponse, ...discarded] = responseMessage.split('/n/n');
+      const [finalResponse, ...discarded] =
+        responseMessage.split(/(\r?\n\s*){2,}/);
       if (discarded.length) {
         this.logger.debug(
           `Discarded response: ${JSON.stringify(discarded, null, 2)}`,
