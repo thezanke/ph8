@@ -49,9 +49,12 @@ export class ChitchatCommandService implements Command {
     const [, ...promptWords] = messageParts;
     const prompt = [
       await this.getPromptMessageContext(message),
-      `${this.gptService.humanPrompt} ${promptWords.join(' ')}`,
+      promptWords.length &&
+        `${this.gptService.humanPrompt} ${promptWords.join(' ')}`,
       this.gptService.botPrompt,
-    ].join('\n');
+    ]
+      .filter(Boolean)
+      .join('\n');
 
     const response = await this.gptService.getCompletion(prompt);
 

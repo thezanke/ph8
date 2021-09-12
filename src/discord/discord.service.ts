@@ -11,7 +11,7 @@ export class DiscordService {
 
   constructor(
     @Inject(DISCORD_CLIENT)
-    private readonly discordClient: Client,
+    public readonly discordClient: Client,
     private readonly eventEmitter: EventEmitter2,
   ) {
     this.discordClient.on('error', this.logger.error.bind(this.logger));
@@ -28,6 +28,10 @@ export class DiscordService {
 
   public get userId() {
     return this.discordClient.user?.id;
+  }
+
+  public get username() {
+    return this.discordClient.user?.username;
   }
 
   private determineIfOwnMessage(message: Message) {

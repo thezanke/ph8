@@ -6,7 +6,6 @@ import { DISCORD_EVENTS } from '../discord/constants';
 import { DiscordService } from '../discord/discord.service';
 import { Command } from './types';
 
-const TRIGGER = '!?ph8';
 const DEFAULT_COMMAND = 'chitchat';
 const UNKNOWN_COMMAND = 'chitchat';
 
@@ -19,7 +18,7 @@ export class CommandsService {
 
   @OnEvent(DISCORD_EVENTS.messageCreate)
   public async handleMessage(message: Message) {
-    if (!this.determineIfCommand(message.content)) return;
+    if (!this.determineIfCommand(message.cleanContent)) return;
     await this.handleCommand(message);
   }
 
@@ -33,25 +32,10 @@ export class CommandsService {
     this.logger.log(`"${command.commandName}" command registered`);
   }
 
-  private checkIfStringStartsWithMention(messageContent: string) {
-    if (!this.discordService.userId) return;
-
-    return (
-      messageContent.startsWith(
-        Formatters.memberNicknameMention(this.discordService.userId),
-      ) ||
-      messageContent.startsWith(
-        Formatters.userMention(this.discordService.userId),
-      ) ||
-      messageContent.startsWith(
-        Formatters.roleMention(this.discordService.userId),
-      )
-    );
-  }
-
   private determineIfCommand(messageContent: string) {
-    if (this.checkIfStringStartsWithMention(messageContent)) return true;
-    return new RegExp(`^${TRIGGER},?`, 'i').test(messageContent);
+    const re = new RegExp(`^[!@]?${this.discordService.username} `, 'i');
+
+    return re.test(messageContent);
   }
 
   private getCommand(commandName = DEFAULT_COMMAND) {
