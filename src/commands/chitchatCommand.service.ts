@@ -92,6 +92,11 @@ export class ChitchatCommandService implements Command {
       return;
     }
 
+    if (message.reference) {
+      const reference = await message.fetchReference();
+      if (reference?.author.id === this.discordService.userId) return;
+    }
+
     const messageParts = message.cleanContent.split(' ');
     return this.handleGptChitchat(message, messageParts.slice(1).join(' '));
   }
