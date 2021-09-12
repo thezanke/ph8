@@ -79,7 +79,14 @@ export class ChitchatCommandService implements Command {
       const responseMessage = this.getCompletionResponseMessage(response.data);
       this.logger.debug('GPT3 Response:\n' + responseMessage);
 
-      message.reply(responseMessage);
+      const [finalResponse, ...discarded] = responseMessage.split('/n/n');
+      if (discarded.length) {
+        this.logger.debug(
+          `Discarded response: ${JSON.stringify(discarded, null, 2)}`,
+        );
+      }
+
+      message.reply(finalResponse);
     } catch (e) {
       this.logger.error(e);
       message.reply('That one hurt my brain..');
