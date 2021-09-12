@@ -65,7 +65,7 @@ export class ChitchatCommandService implements Command {
   private getCompletionResponseMessage(response: CompletionResponse) {
     if (!response.choices.length) return '??';
 
-    const [responseMessageChoice] = response?.choices[0]?.text.split('\n\n');
+    const responseMessageChoice = response?.choices[0]?.text;
 
     return responseMessageChoice.replace('@', '').trim();
   }
