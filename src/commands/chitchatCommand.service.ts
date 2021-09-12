@@ -58,27 +58,32 @@ export class ChitchatCommandService implements Command {
   }
 
   private async handleGptChitchat(message: Message, humanPromptText?: string) {
-    const prompt = [
-      await this.getPromptMessageContext(message),
-      humanPromptText?.length && `${this.humanPrompt} ${humanPromptText}`,
-      this.botPrompt,
-    ]
-      .filter(Boolean)
-      .join('\n');
+    try {
+      const prompt = [
+        await this.getPromptMessageContext(message),
+        humanPromptText?.length && `${this.humanPrompt} ${humanPromptText}`,
+        this.botPrompt,
+      ]
+        .filter(Boolean)
+        .join('\n');
 
-    this.logger.debug('Requesting GPT3 Completion:\n ' + prompt);
+      this.logger.debug('Requesting GPT3 Completion:\n ' + prompt);
 
-    const response = await this.gptService.getCompletion(prompt, [
-      '/n',
-      this.humanPrompt,
-      this.botPrompt,
-      this.otherPrompt,
-    ]);
+      const response = await this.gptService.getCompletion(prompt, [
+        '/n',
+        this.humanPrompt,
+        this.botPrompt,
+        this.otherPrompt,
+      ]);
 
-    const responseMessage = this.getCompletionResponseMessage(response.data);
-    this.logger.debug('GPT3 Response:\n ' + responseMessage);
+      const responseMessage = this.getCompletionResponseMessage(response.data);
+      this.logger.debug('GPT3 Response:\n ' + responseMessage);
 
-    message.reply(responseMessage);
+      message.reply(responseMessage);
+    } catch (e) {
+      this.logger.error(e);
+      message.reply('That one hurt my brain..');
+    }
   }
 
   public async execute(message: Message) {
