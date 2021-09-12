@@ -6,7 +6,7 @@ import { firstValueFrom } from 'rxjs';
 
 import { EnvironmentVariables } from '../config/validate';
 
-const MAX_TOKENS = 150;
+const MAX_TOKENS = 100;
 
 export type CompletionResponse = {
   id: string;
