@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { OnEvent } from '@nestjs/event-emitter';
 import { Message } from 'discord.js';
@@ -24,7 +24,17 @@ export class ChitchatCommandService implements Command {
   public commandName = 'chitchat';
   public omitFromListing = true;
 
-  private readonly logger = new Logger(ChitchatCommandService.name);
+  public humanPrompt = this.configService.get<string>(
+    'GPT3_HUMAN_PROMPT',
+    'human:',
+  );
+  public botPrompt = this.configService.get<string>('GPT3_BOT_PROMPT', 'bot:');
+  public startingPrompt = this.configService.get<string>(
+    'GPT3_STARTING_PROMPT',
+    'Discussion between a human and a chat bot.\n\nhuman: ',
+  );
+  public otherPrompt = 'Somebody:';
+
   private readonly messageContextLimit = Number(
     this.configService.get('CHITCHAT_MESSAGE_CONTEXT_LIMIT', '5'),
   );
@@ -37,7 +47,31 @@ export class ChitchatCommandService implements Command {
 
     if (lastMessage.author.id !== this.discordService.userId) return;
 
-    this.execute(message);
+    if (!this.configService.get('ENABLE_GPT3', false)) {
+      message.reply(`sorry, I'm not my self right now...`);
+      return;
+    }
+
+    return this.handleGptChitchat(message, message.cleanContent.trim());
+  }
+
+  private async handleGptChitchat(message: Message, humanPromptText?: string) {
+    const prompt = [
+      await this.getPromptMessageContext(message),
+      humanPromptText?.length && `${this.humanPrompt} ${humanPromptText}`,
+      this.botPrompt,
+    ]
+      .filter(Boolean)
+      .join('\n');
+
+    const response = await this.gptService.getCompletion(prompt, [
+      '/n',
+      this.humanPrompt,
+      this.botPrompt,
+      this.otherPrompt,
+    ]);
+
+    message.reply(this.getCompletionResponseMessage(response.data));
   }
 
   public async execute(message: Message) {
@@ -47,19 +81,7 @@ export class ChitchatCommandService implements Command {
     }
 
     const messageParts = message.cleanContent.split(' ');
-    const [, ...promptWords] = messageParts;
-    const prompt = [
-      await this.getPromptMessageContext(message),
-      promptWords.length &&
-        `${this.gptService.humanPrompt} ${promptWords.join(' ')}`,
-      this.gptService.botPrompt,
-    ]
-      .filter(Boolean)
-      .join('\n');
-
-    const response = await this.gptService.getCompletion(prompt);
-
-    message.reply(this.getCompletionResponseMessage(response.data));
+    return this.handleGptChitchat(message, messageParts.slice(1).join(' '));
   }
 
   private getCompletionResponseMessage(response: CompletionResponse) {
@@ -72,10 +94,7 @@ export class ChitchatCommandService implements Command {
 
   private async getPromptMessageContext(message: Message) {
     const promptMessageHistory = await this.buildPromptMessageHistory(message);
-    const prompt = [
-      this.gptService.startingPrompt,
-      ...promptMessageHistory,
-    ].join('\n');
+    const prompt = [this.startingPrompt, ...promptMessageHistory].join('\n');
 
     return prompt;
   }
@@ -91,10 +110,13 @@ export class ChitchatCommandService implements Command {
     ) {
       lastMessage = await lastMessage.fetchReference();
 
+      let userPrompt = this.otherPrompt;
+
       const isBotAuthor = lastMessage.author.id === this.discordService.userId;
-      const userPrompt = isBotAuthor
-        ? this.gptService.botPrompt
-        : this.gptService.humanPrompt;
+      if (isBotAuthor) userPrompt = this.botPrompt;
+
+      const isFocusAuthor = lastMessage.author.id === message.author.id;
+      if (isFocusAuthor) userPrompt = this.humanPrompt;
 
       messageHistory.unshift(`${userPrompt} ${lastMessage.cleanContent}`);
     }

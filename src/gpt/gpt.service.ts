@@ -28,13 +28,6 @@ export class GptService {
     private readonly configService: ConfigService<EnvironmentVariables>,
   ) {}
 
-  public humanPrompt = this.configService.get('GPT3_HUMAN_PROMPT', 'human:');
-  public botPrompt = this.configService.get('GPT3_BOT_PROMPT', 'bot:');
-  public startingPrompt = this.configService.get(
-    'GPT3_STARTING_PROMPT',
-    'Discussion between a human and a chat bot.\n\nhuman: ',
-  );
-
   private logger = new Logger(GptService.name);
 
   private defaultCompletionOptions = {
@@ -43,11 +36,11 @@ export class GptService {
     top_p: 1,
     frequency_penalty: 0,
     presence_penalty: 0.6,
-    stop: ['/n', this.humanPrompt, this.botPrompt],
   };
 
   public getCompletion(
     prompt: string,
+    stop: string[],
   ): Promise<AxiosResponse<CompletionResponse>> {
     this.logger.debug(`Requesting completion:\n${prompt}`);
 
@@ -55,6 +48,7 @@ export class GptService {
       this.httpService.post('/completions', {
         ...this.defaultCompletionOptions,
         prompt,
+        stop,
       }),
     );
   }

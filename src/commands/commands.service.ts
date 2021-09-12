@@ -33,7 +33,10 @@ export class CommandsService {
   }
 
   private determineIfCommand(messageContent: string) {
-    const re = new RegExp(`^[!@]?${this.discordService.username},?\\b`, 'i');
+    const re = new RegExp(
+      `^(?:.{1})?${this.discordService.username}(?:.{1})?(?: |$)`,
+      'mi',
+    );
 
     return re.test(messageContent);
   }
