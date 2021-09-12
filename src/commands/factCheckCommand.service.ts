@@ -85,12 +85,12 @@ export class FactCheckCommandService implements Command {
     return claim.claimReview.length > 0;
   };
 
-  private mapClaimForEmbed(claim: FactCheckClaim): FactCheckClaim {
+  private mapClaimForEmbed = (claim: FactCheckClaim): FactCheckClaim => {
     return {
       ...claim,
       claimReview: claim.claimReview.filter(this.filterReviewsForEmbed),
     };
-  }
+  };
 
   private getClaimsForEmbed(claims: FactCheckClaim[]) {
     return claims
