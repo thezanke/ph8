@@ -10,7 +10,7 @@ import { CompletionResponse, GptService } from '../gpt/gpt.service';
 import { CommandsService } from './commands.service';
 import { Command } from './types';
 
-const MESSAGE_CONTEXT_LIMIT = 10;
+const MESSAGE_CONTEXT_LIMIT = 20;
 
 @Injectable()
 export class ChitchatCommandService implements Command {

@@ -6,6 +6,8 @@ import { firstValueFrom } from 'rxjs';
 
 import { EnvironmentVariables } from '../config/validate';
 
+const MAX_TOKENS = 150;
+
 export type CompletionResponse = {
   id: string;
   object: string;
@@ -26,18 +28,18 @@ export class GptService {
     private readonly configService: ConfigService<EnvironmentVariables>,
   ) {}
 
+  public humanPrompt = this.configService.get('GPT3_HUMAN_PROMPT', 'human:');
+  public botPrompt = this.configService.get('GPT3_BOT_PROMPT', 'bot:');
   public startingPrompt = this.configService.get(
     'GPT3_STARTING_PROMPT',
     'Discussion between a human and a chat bot.\n\nhuman: ',
   );
-  public humanPrompt = this.configService.get('GPT3_HUMAN_PROMPT', 'human:');
-  public botPrompt = this.configService.get('GPT3_BOT_PROMPT', 'bot:');
 
   private logger = new Logger(GptService.name);
 
   private defaultCompletionOptions = {
     temperature: 0.9,
-    max_tokens: 75,
+    max_tokens: MAX_TOKENS,
     top_p: 1,
     frequency_penalty: 0,
     presence_penalty: 0.6,
