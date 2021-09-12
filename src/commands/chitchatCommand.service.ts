@@ -10,8 +10,6 @@ import { CompletionResponse, GptService } from '../gpt/gpt.service';
 import { CommandsService } from './commands.service';
 import { Command } from './types';
 
-const MESSAGE_CONTEXT_LIMIT = 20;
-
 @Injectable()
 export class ChitchatCommandService implements Command {
   constructor(
@@ -27,6 +25,10 @@ export class ChitchatCommandService implements Command {
   public omitFromListing = true;
 
   private readonly logger = new Logger(ChitchatCommandService.name);
+  private readonly messageContextLimit = this.configService.get(
+    'CHITCHAT_MESSAGE_CONTEXT_LIMIT',
+    5,
+  );
 
   @OnEvent(DISCORD_EVENTS.messageCreate)
   async handleMessage(message: Message) {
@@ -86,7 +88,7 @@ export class ChitchatCommandService implements Command {
     let lastMessage = message;
 
     while (
-      messageHistory.length < MESSAGE_CONTEXT_LIMIT &&
+      messageHistory.length < this.messageContextLimit &&
       lastMessage.reference
     ) {
       lastMessage = await lastMessage.fetchReference();

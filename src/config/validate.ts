@@ -56,6 +56,9 @@ export class EnvironmentVariables {
 
   @IsString()
   GPT3_HUMAN_PROMPT?: string;
+
+  @IsString()
+  CHITCHAT_MESSAGE_CONTEXT_LIMIT?: string;
 }
 
 export function validate(config: Record<string, unknown>) {
