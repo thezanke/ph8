@@ -25,9 +25,8 @@ export class ChitchatCommandService implements Command {
   public omitFromListing = true;
 
   private readonly logger = new Logger(ChitchatCommandService.name);
-  private readonly messageContextLimit = this.configService.get(
-    'CHITCHAT_MESSAGE_CONTEXT_LIMIT',
-    5,
+  private readonly messageContextLimit = Number(
+    this.configService.get('CHITCHAT_MESSAGE_CONTEXT_LIMIT', '5'),
   );
 
   @OnEvent(DISCORD_EVENTS.messageCreate)
