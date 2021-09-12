@@ -33,7 +33,7 @@ export class ChitchatCommandService implements Command {
     'GPT3_STARTING_PROMPT',
     'Discussion between a human and a chat bot.\n\nhuman: ',
   );
-  public otherPrompt = 'Somebody:';
+  public otherPrompt = 'Friend:';
 
   private logger = new Logger(ChitchatCommandService.name);
 
