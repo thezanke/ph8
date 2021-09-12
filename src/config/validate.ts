@@ -1,4 +1,4 @@
-import { plainToClass } from 'class-transformer';
+import { plainToClass, Transform } from 'class-transformer';
 import {
   IsBoolean,
   IsEnum,
@@ -38,8 +38,9 @@ export class EnvironmentVariables {
   @IsString()
   GOOGLE_API_KEY: string;
 
+  @Transform(({ value }) => value.toLowerCase() === 'true')
   @IsBoolean()
-  ENABLE_GPT3: boolean;
+  ENABLE_GPT3: string;
 
   @IsString()
   GPT3_API_SECRET?: string;
