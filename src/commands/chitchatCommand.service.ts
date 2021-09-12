@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { OnEvent } from '@nestjs/event-emitter';
 import { Message } from 'discord.js';
@@ -35,6 +35,8 @@ export class ChitchatCommandService implements Command {
   );
   public otherPrompt = 'Somebody:';
 
+  private logger = new Logger(ChitchatCommandService.name);
+
   private readonly messageContextLimit = Number(
     this.configService.get('CHITCHAT_MESSAGE_CONTEXT_LIMIT', '5'),
   );
@@ -64,6 +66,8 @@ export class ChitchatCommandService implements Command {
       .filter(Boolean)
       .join('\n');
 
+    this.logger.debug('Requesting GPT3 Completion:\n ' + prompt);
+
     const response = await this.gptService.getCompletion(prompt, [
       '/n',
       this.humanPrompt,
@@ -71,7 +75,10 @@ export class ChitchatCommandService implements Command {
       this.otherPrompt,
     ]);
 
-    message.reply(this.getCompletionResponseMessage(response.data));
+    const responseMessage = this.getCompletionResponseMessage(response.data);
+    this.logger.debug('GPT3 Response:\n ' + responseMessage);
+
+    message.reply(responseMessage);
   }
 
   public async execute(message: Message) {

@@ -1,10 +1,7 @@
 import { HttpService } from '@nestjs/axios';
-import { Injectable, Logger } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
+import { Injectable } from '@nestjs/common';
 import { AxiosResponse } from 'axios';
 import { firstValueFrom } from 'rxjs';
-
-import { EnvironmentVariables } from '../config/validate';
 
 const MAX_TOKENS = 100;
 
@@ -23,12 +20,7 @@ export type CompletionResponse = {
 
 @Injectable()
 export class GptService {
-  constructor(
-    private readonly httpService: HttpService,
-    private readonly configService: ConfigService<EnvironmentVariables>,
-  ) {}
-
-  private logger = new Logger(GptService.name);
+  constructor(private readonly httpService: HttpService) {}
 
   private defaultCompletionOptions = {
     temperature: 0.9,
@@ -42,8 +34,6 @@ export class GptService {
     prompt: string,
     stop: string[],
   ): Promise<AxiosResponse<CompletionResponse>> {
-    this.logger.debug(`Requesting completion:\n${prompt}`);
-
     return firstValueFrom(
       this.httpService.post('/completions', {
         ...this.defaultCompletionOptions,
