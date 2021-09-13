@@ -41,6 +41,10 @@ export class ChitchatCommandService implements Command {
     this.configService.get('CHITCHAT_MESSAGE_CONTEXT_LIMIT', '5'),
   );
 
+  public gptChitchatMaxTokens = Number(
+    this.configService.get<string>('CHITCHAT_GPT_MAX_TOKENS', '60'),
+  );
+
   @OnEvent(DISCORD_EVENTS.messageCreate)
   async handleMessage(message: Message) {
     if (!message.reference) return;
@@ -69,12 +73,11 @@ export class ChitchatCommandService implements Command {
 
       this.logger.debug('Requesting GPT3 Completion:\n' + prompt);
 
-      const response = await this.gptService.getCompletion(prompt, [
-        '/n',
-        this.humanPrompt,
-        this.botPrompt,
-        this.otherPrompt,
-      ]);
+      const response = await this.gptService.getCompletion(
+        prompt,
+        ['/n', this.humanPrompt, this.botPrompt, this.otherPrompt],
+        60,
+      );
 
       const responseMessage = this.getCompletionResponseMessage(response.data);
       this.logger.debug('GPT3 Response:\n' + responseMessage);

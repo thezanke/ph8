@@ -59,6 +59,9 @@ export class EnvironmentVariables {
 
   @IsString()
   CHITCHAT_MESSAGE_CONTEXT_LIMIT?: string;
+
+  @IsString()
+  CHITCHAT_GPT_MAX_TOKENS?: string;
 }
 
 export function validate(config: Record<string, unknown>) {
