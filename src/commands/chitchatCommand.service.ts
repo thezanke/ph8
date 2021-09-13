@@ -33,7 +33,7 @@ export class ChitchatCommandService implements Command {
     'GPT3_STARTING_PROMPT',
     'Discussion between a human and a chat bot.\n\nhuman: ',
   );
-  public otherPrompt = 'Friend:';
+  public otherPrompt = 'Somebody:';
 
   private logger = new Logger(ChitchatCommandService.name);
 
@@ -75,7 +75,7 @@ export class ChitchatCommandService implements Command {
 
       const response = await this.gptService.getCompletion(
         prompt,
-        ['/n', this.humanPrompt, this.botPrompt, this.otherPrompt],
+        [`/n`, this.humanPrompt, this.botPrompt, this.otherPrompt],
         60,
       );
 
