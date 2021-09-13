@@ -3,6 +3,7 @@ import {
   IsBoolean,
   IsEnum,
   IsNumber,
+  IsOptional,
   IsString,
   validateSync,
 } from 'class-validator';
@@ -43,24 +44,31 @@ export class EnvironmentVariables {
   ENABLE_GPT3: string;
 
   @IsString()
+  @IsOptional()
   GPT3_API_SECRET?: string;
 
   @IsString()
+  @IsOptional()
   GPT3_API_BASE_URL?: string;
 
   @IsString()
+  @IsOptional()
   GPT3_STARTING_PROMPT?: string;
 
   @IsString()
+  @IsOptional()
   GPT3_BOT_PROMPT?: string;
 
   @IsString()
+  @IsOptional()
   GPT3_HUMAN_PROMPT?: string;
 
   @IsString()
+  @IsOptional()
   CHITCHAT_MESSAGE_CONTEXT_LIMIT?: string;
 
   @IsString()
+  @IsOptional()
   CHITCHAT_GPT_MAX_TOKENS?: string;
 }
 
