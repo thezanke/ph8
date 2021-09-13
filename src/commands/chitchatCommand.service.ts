@@ -93,6 +93,10 @@ export class ChitchatCommandService implements Command {
       message.reply(finalResponse);
     } catch (e) {
       this.logger.error(e);
+      if (e.response?.status === 429) {
+        message.reply('Out of credits... Please insert token.');
+        return;
+      }
       message.reply('That one hurt my brain..');
     }
   }
