@@ -21,8 +21,7 @@ export class GptService {
   constructor(private readonly httpService: HttpService) {}
 
   private defaultCompletionOptions = {
-    temperature: 0.4,
-    top_p: 0.3,
+    temperature: 0.9,
     frequency_penalty: 0.5,
     presence_penalty: 0.0,
   };
