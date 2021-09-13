@@ -76,7 +76,7 @@ export class ChitchatCommandService implements Command {
       const response = await this.gptService.getCompletion(
         prompt,
         [`/n`, this.humanPrompt, this.botPrompt, this.otherPrompt],
-        60,
+        this.gptChitchatMaxTokens,
       );
 
       const responseMessage = this.getCompletionResponseMessage(response.data);
