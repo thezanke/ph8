@@ -1,4 +1,5 @@
 import { Inject, Injectable, Logger } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { Client, Message, MessageReaction, User } from 'discord.js';
 import { EventEmitter2 } from 'eventemitter2';
 
@@ -9,10 +10,15 @@ import { DISCORD_CLIENT } from './providers/discordClient.provider';
 export class DiscordService {
   private readonly logger = new Logger(DiscordService.name);
 
+  private readonly replyChainLimit = Number(
+    this.configService.get('CHITCHAT_MESSAGE_CONTEXT_LIMIT', '5'),
+  );
+
   constructor(
     @Inject(DISCORD_CLIENT)
     private readonly discordClient: Client,
     private readonly eventEmitter: EventEmitter2,
+    private readonly configService: ConfigService,
   ) {
     this.discordClient.on('error', this.logger.error.bind(this.logger));
     this.discordClient.on('debug', this.logger.verbose.bind(this.logger));
@@ -32,6 +38,18 @@ export class DiscordService {
 
   public get username() {
     return this.discordClient.user?.username;
+  }
+
+  public async fetchReplyChain(message: Message): Promise<Message[]> {
+    const replyChain: Message[] = [];
+    let m = message;
+
+    while (m.reference && replyChain.length < this.replyChainLimit) {
+      m = await m.fetchReference();
+      replyChain.push(m);
+    }
+
+    return replyChain;
   }
 
   private determineIfOwnMessage(message: Message) {

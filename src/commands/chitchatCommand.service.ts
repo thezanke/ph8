@@ -58,107 +58,14 @@ export class ChitchatCommandService implements Command {
 
   private logger = new Logger(ChitchatCommandService.name);
 
-  private readonly messageContextLimit = Number(
-    this.configService.get('CHITCHAT_MESSAGE_CONTEXT_LIMIT', '5'),
-  );
-
   private readonly gptChitchatMaxTokens = Number(
     this.configService.get<string>('CHITCHAT_GPT_MAX_TOKENS', '60'),
   );
 
-  private async handleGptChitchat(message: Message, messageText?: string) {
-    try {
-      const prompt = [
-        await this.getPromptMessageContext(message),
-        messageText?.length && `${message.author.username}: ${messageText}`,
-        `${this.discordService.username}:`,
-      ]
-        .filter(Boolean)
-        .join('\n');
-
-      this.logger.debug('Requesting GPT3 Completion:\n' + prompt);
-
-      const response = await this.gptService.getCompletion(
-        prompt,
-        ['\n', '\n\n'],
-        this.gptChitchatMaxTokens,
-      );
-
-      const responseMessage = this.getCompletionResponseMessage(response.data);
-      this.logger.debug('GPT3 Response:\n' + responseMessage);
-
-      const [finalResponse, ...discarded] =
-        responseMessage.split(/(\r?\n\s*){2,}/);
-      if (discarded.length) {
-        this.logger.debug(
-          `Discarded response: ${JSON.stringify(discarded, null, 2)}`,
-        );
-      }
-
-      message.reply(finalResponse);
-    } catch (e) {
-      this.logger.error(e);
-      if (e.response?.status === 429) {
-        message.reply('Out of credits... Please insert token.');
-        return;
-      }
-      message.reply('That one hurt my brain..');
-    }
-  }
-  private getParticipantsNames(message: Message, replyChain: Message[]) {
-    const names = [this.discordService.username ?? 'Ph8'];
-    names.push(
-      ...[message, ...replyChain].map((m) => m.author.username ?? 'User'),
-    );
-    return [...new Set(names)];
-  }
-
-  public async fetchReplyChain(message: Message): Promise<Message[]> {
-    const replyChain: Message[] = [];
-    let m = message;
-
-    while (m.reference && replyChain.length < this.messageContextLimit) {
-      m = await m.fetchReference();
-      replyChain.push(m);
-    }
-
-    return replyChain;
-  }
-
-  private getCompletionResponseMessage(response: CompletionResponse) {
-    if (!response.choices.length) return '??';
-
-    const responseMessageChoice = response?.choices[0]?.text;
-
-    return responseMessageChoice.replace('@', '').trim();
-  }
-
-  private async getPromptMessageContext(message: Message) {
-    const replyChain = await this.fetchReplyChain(message);
-    const participantsNames = this.getParticipantsNames(message, replyChain);
-    const joinedParticipantNames = this.getJoinedStringArray(participantsNames);
-
-    const replyChainMessageHistory = await this.buildReplyChainMessageHistory(
-      replyChain,
-    );
-
-    const prompt = [
-      `Here is a conversation between ${joinedParticipantNames}.`,
-      '',
-      ...this.createExampleConvo(participantsNames),
-      ...replyChainMessageHistory,
-    ].join('\n');
-
-    return prompt;
-  }
-
-  private getJoinedStringArray(parts: string[]) {
-    const _parts = [...parts];
-    const last = _parts.pop();
-
-    if (!_parts.length) return last ?? '';
-
-    return `${_parts.join(', ')} and ${last}`;
+  private async buildReplyChainMessageHistory(replyChain: Message[]) {
+    return replyChain
+      .reverse()
+      .map((m) => this.createChatMessage(m.author.username, m.cleanContent));
   }
 
   private createChatMessage = (username: string, message: string) => {
@@ -179,9 +86,89 @@ export class ChitchatCommandService implements Command {
     ];
   }
 
-  private async buildReplyChainMessageHistory(replyChain: Message[]) {
-    return replyChain
-      .reverse()
-      .map((m) => this.createChatMessage(m.author.username, m.cleanContent));
+  private getCompletionResponseMessage(response: CompletionResponse) {
+    if (!response.choices.length) return '??';
+
+    const responseMessageChoice = response?.choices[0]?.text;
+
+    return responseMessageChoice.replace('@', '').trim();
+  }
+
+  private getJoinedStringArray(parts: string[]) {
+    if (parts.length < 2) return parts[0];
+
+    const body = [...parts];
+    const tail = body.pop();
+
+    return `${body.join(', ')} and ${tail}`;
+  }
+
+  private getParticipantsNames(message: Message, replyChain: Message[]) {
+    const names: Set<string> = new Set();
+    names.add(this.discordService.username ?? 'Ph8');
+    [message, ...replyChain].forEach((m) =>
+      names.add(m.author.username ?? 'User'),
+    );
+
+    return Array.from(names);
+  }
+
+  private async getPromptMessageContext(message: Message) {
+    const replyChain = await this.discordService.fetchReplyChain(message);
+    const participantsNames = this.getParticipantsNames(message, replyChain);
+    const joinedParticipantNames = this.getJoinedStringArray(participantsNames);
+
+    const replyChainMessageHistory = await this.buildReplyChainMessageHistory(
+      replyChain,
+    );
+
+    const prompt = [
+      `Here is a conversation between ${joinedParticipantNames}.`,
+      '',
+      ...this.createExampleConvo(participantsNames),
+      ...replyChainMessageHistory,
+    ].join('\n');
+
+    return prompt;
+  }
+
+  private async buildFinalPrompt(message: Message, messageText?: string) {
+    return [
+      await this.getPromptMessageContext(message),
+      messageText?.length && `${message.author.username}: ${messageText}`,
+      `${this.discordService.username}:`,
+    ]
+      .filter(Boolean)
+      .join('\n');
+  }
+
+  private;
+
+  private async handleGptChitchat(message: Message, messageText?: string) {
+    try {
+      const prompt = await this.buildFinalPrompt(message, messageText);
+
+      this.logger.debug('Requesting GPT3 Completion:\n' + prompt);
+
+      const response = await this.gptService.getCompletion(
+        prompt,
+        ['\n', '\n\n'],
+        this.gptChitchatMaxTokens,
+      );
+
+      const responseMessage = this.getCompletionResponseMessage(response.data);
+
+      this.logger.debug('GPT3 Response:\n' + responseMessage);
+
+      message.reply(responseMessage);
+    } catch (e) {
+      this.logger.error(e);
+
+      if (e.response?.status === 429) {
+        message.reply('Out of credits... Please insert token.');
+      } else {
+        message.reply('That one hurt my brain..');
+      }
+    }
   }
 }
