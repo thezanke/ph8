@@ -61,12 +61,12 @@ export class ChitchatCommandService implements Command {
     return this.handleGptChitchat(message, message.cleanContent.trim());
   }
 
-  private async handleGptChitchat(message: Message, humanPromptText?: string) {
+  private async handleGptChitchat(message: Message, messageText?: string) {
     try {
       const prompt = [
         await this.getPromptMessageContext(message),
-        humanPromptText?.length && `${this.humanPrompt} ${humanPromptText}`,
-        this.botPrompt,
+        messageText?.length && `${message.author.username}: ${messageText}`,
+        `${this.discordService.username}:`,
       ]
         .filter(Boolean)
         .join('\n');
@@ -75,7 +75,7 @@ export class ChitchatCommandService implements Command {
 
       const response = await this.gptService.getCompletion(
         prompt,
-        [`/n`, this.humanPrompt, this.botPrompt, this.otherPrompt],
+        ['\n', '\n\n'],
         this.gptChitchatMaxTokens,
       );
 
@@ -99,6 +99,25 @@ export class ChitchatCommandService implements Command {
       }
       message.reply('That one hurt my brain..');
     }
+  }
+  private getParticipantsNames(message: Message, replyChain: Message[]) {
+    const names = [this.discordService.username ?? 'Ph8'];
+    names.push(
+      ...[message, ...replyChain].map((m) => m.author.username ?? 'User'),
+    );
+    return [...new Set(names)];
+  }
+
+  public async fetchReplyChain(message: Message): Promise<Message[]> {
+    const replyChain: Message[] = [];
+    let m = message;
+
+    while (m.reference) {
+      m = await m.fetchReference();
+      replyChain.push(m);
+    }
+
+    return replyChain;
   }
 
   public async execute(message: Message) {
@@ -125,34 +144,54 @@ export class ChitchatCommandService implements Command {
   }
 
   private async getPromptMessageContext(message: Message) {
-    const promptMessageHistory = await this.buildPromptMessageHistory(message);
-    const prompt = [this.startingPrompt, ...promptMessageHistory].join('\n');
+    const replyChain = await this.fetchReplyChain(message);
+    const participantsNames = this.getParticipantsNames(message, replyChain);
+    const participantNameString = this.getArrayString(participantsNames);
+
+    const replyChainMessageHistory = await this.buildReplyChainMessageHistory(
+      replyChain,
+    );
+
+    const prompt = [
+      `Here is a conversation between ${participantNameString}.`,
+      '',
+      ...this.createExampleConvo(participantsNames),
+      ...replyChainMessageHistory,
+    ].join('\n');
 
     return prompt;
   }
 
-  private async buildPromptMessageHistory(message: Message) {
-    const messageHistory: string[] = [];
+  getArrayString(parts: string[]) {
+    const _parts = [...parts];
+    const last = _parts.pop();
 
-    let lastMessage = message;
+    if (!_parts.length) return last ?? '';
 
-    while (
-      messageHistory.length < this.messageContextLimit &&
-      lastMessage.reference
-    ) {
-      lastMessage = await lastMessage.fetchReference();
+    return `${_parts.join(', ')} and ${last}`;
+  }
 
-      let userPrompt = this.otherPrompt;
+  private createChatMessage = (username: string, message: string) => {
+    return `${username}: ${message}`;
+  };
 
-      const isBotAuthor = lastMessage.author.id === this.discordService.userId;
-      if (isBotAuthor) userPrompt = this.botPrompt;
+  private createExampleConvo(participantNames: string[]) {
+    const botName = this.discordService.username ?? 'Ph8';
+    const [, ...names] = participantNames;
+    const user1 = names.pop() ?? 'User';
+    const user2 = names.pop() ?? user1;
 
-      const isFocusAuthor = lastMessage.author.id === message.author.id;
-      if (isFocusAuthor) userPrompt = this.humanPrompt;
+    return [
+      this.createChatMessage(user1, 'Oh hi, what is your name?'),
+      this.createChatMessage(botName, `Hi! My name is ${botName}.`),
+      this.createChatMessage(user2, 'Whats up?'),
+      this.createChatMessage(botName, 'Just hanging out, relaxing. You?'),
+    ];
+  }
 
-      messageHistory.unshift(`${userPrompt} ${lastMessage.cleanContent}`);
-    }
-
-    return messageHistory;
+  private async buildReplyChainMessageHistory(replyChain: Message[]) {
+    return replyChain
+      .reverse()
+      .map((m) => this.createChatMessage(m.author.username, m.cleanContent));
   }
 }
