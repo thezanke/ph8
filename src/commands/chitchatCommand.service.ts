@@ -24,29 +24,24 @@ export class ChitchatCommandService implements Command {
   public commandName = 'chitchat';
   public omitFromListing = true;
 
-  public humanPrompt = this.configService.get<string>(
-    'GPT3_HUMAN_PROMPT',
-    'human:',
-  );
-  public botPrompt = this.configService.get<string>('GPT3_BOT_PROMPT', 'bot:');
-  public startingPrompt = this.configService.get<string>(
-    'GPT3_STARTING_PROMPT',
-    'Discussion between a human and a chat bot.\n\nhuman: ',
-  );
-  public otherPrompt = 'Somebody:';
+  public async execute(message: Message) {
+    if (!this.configService.get('ENABLE_GPT3', false)) {
+      message.reply(`what's up bud?`);
+      return;
+    }
 
-  private logger = new Logger(ChitchatCommandService.name);
+    if (message.reference) {
+      const reference = await message.fetchReference();
+      if (reference?.author.id === this.discordService.userId) return;
+    }
 
-  private readonly messageContextLimit = Number(
-    this.configService.get('CHITCHAT_MESSAGE_CONTEXT_LIMIT', '5'),
-  );
+    const messageParts = message.cleanContent.split(' ');
 
-  public gptChitchatMaxTokens = Number(
-    this.configService.get<string>('CHITCHAT_GPT_MAX_TOKENS', '60'),
-  );
+    return this.handleGptChitchat(message, messageParts.slice(1).join(' '));
+  }
 
   @OnEvent(DISCORD_EVENTS.messageCreate)
-  async handleMessage(message: Message) {
+  public async handleMessage(message: Message) {
     if (!message.reference) return;
 
     const lastMessage = await message.fetchReference();
@@ -60,6 +55,16 @@ export class ChitchatCommandService implements Command {
 
     return this.handleGptChitchat(message, message.cleanContent.trim());
   }
+
+  private logger = new Logger(ChitchatCommandService.name);
+
+  private readonly messageContextLimit = Number(
+    this.configService.get('CHITCHAT_MESSAGE_CONTEXT_LIMIT', '5'),
+  );
+
+  private readonly gptChitchatMaxTokens = Number(
+    this.configService.get<string>('CHITCHAT_GPT_MAX_TOKENS', '60'),
+  );
 
   private async handleGptChitchat(message: Message, messageText?: string) {
     try {
@@ -112,27 +117,12 @@ export class ChitchatCommandService implements Command {
     const replyChain: Message[] = [];
     let m = message;
 
-    while (m.reference) {
+    while (m.reference && replyChain.length < this.messageContextLimit) {
       m = await m.fetchReference();
       replyChain.push(m);
     }
 
     return replyChain;
-  }
-
-  public async execute(message: Message) {
-    if (!this.configService.get('ENABLE_GPT3', false)) {
-      message.reply(`what's up bud?`);
-      return;
-    }
-
-    if (message.reference) {
-      const reference = await message.fetchReference();
-      if (reference?.author.id === this.discordService.userId) return;
-    }
-
-    const messageParts = message.cleanContent.split(' ');
-    return this.handleGptChitchat(message, messageParts.slice(1).join(' '));
   }
 
   private getCompletionResponseMessage(response: CompletionResponse) {
@@ -162,7 +152,7 @@ export class ChitchatCommandService implements Command {
     return prompt;
   }
 
-  getArrayString(parts: string[]) {
+  private getArrayString(parts: string[]) {
     const _parts = [...parts];
     const last = _parts.pop();
 
