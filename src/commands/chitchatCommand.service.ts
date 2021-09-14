@@ -136,14 +136,14 @@ export class ChitchatCommandService implements Command {
   private async getPromptMessageContext(message: Message) {
     const replyChain = await this.fetchReplyChain(message);
     const participantsNames = this.getParticipantsNames(message, replyChain);
-    const participantNameString = this.getArrayString(participantsNames);
+    const joinedParticipantNames = this.getJoinedStringArray(participantsNames);
 
     const replyChainMessageHistory = await this.buildReplyChainMessageHistory(
       replyChain,
     );
 
     const prompt = [
-      `Here is a conversation between ${participantNameString}.`,
+      `Here is a conversation between ${joinedParticipantNames}.`,
       '',
       ...this.createExampleConvo(participantsNames),
       ...replyChainMessageHistory,
@@ -152,7 +152,7 @@ export class ChitchatCommandService implements Command {
     return prompt;
   }
 
-  private getArrayString(parts: string[]) {
+  private getJoinedStringArray(parts: string[]) {
     const _parts = [...parts];
     const last = _parts.pop();
 
