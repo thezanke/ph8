@@ -53,18 +53,6 @@ export class EnvironmentVariables {
 
   @IsString()
   @IsOptional()
-  GPT3_STARTING_PROMPT?: string;
-
-  @IsString()
-  @IsOptional()
-  GPT3_BOT_PROMPT?: string;
-
-  @IsString()
-  @IsOptional()
-  GPT3_HUMAN_PROMPT?: string;
-
-  @IsString()
-  @IsOptional()
   CHITCHAT_MESSAGE_CONTEXT_LIMIT?: string;
 
   @IsString()
