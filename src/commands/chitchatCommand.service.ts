@@ -7,6 +7,7 @@ import { EnvironmentVariables } from '../config/validate';
 import { DISCORD_EVENTS } from '../discord/constants';
 import { DiscordService } from '../discord/discord.service';
 import { CompletionResponse, GptService } from '../gpt/gpt.service';
+import { getJoinedStringArray } from '../helpers/getJoinedStringArray';
 import { CommandsService } from './commands.service';
 import { Command } from './types';
 
@@ -86,15 +87,6 @@ export class ChitchatCommandService implements Command {
     return responseMessageChoice.replace('@', '').trim();
   }
 
-  private getJoinedStringArray(parts: string[]) {
-    if (parts.length < 2) return parts[0];
-
-    const body = [...parts];
-    const tail = body.pop();
-
-    return `${body.join(', ')} and ${tail}`;
-  }
-
   private getParticipantsNames(message: Message, replyChain: Message[]) {
     const names: Set<string> = new Set();
     names.add(this.discordService.username ?? 'Ph8');
@@ -108,7 +100,7 @@ export class ChitchatCommandService implements Command {
   private async getPromptMessageContext(message: Message) {
     const replyChain = await this.discordService.fetchReplyChain(message);
     const participantsNames = this.getParticipantsNames(message, replyChain);
-    const joinedParticipantNames = this.getJoinedStringArray(participantsNames);
+    const joinedParticipantNames = getJoinedStringArray(participantsNames);
 
     const replyChainMessageHistory = await this.buildReplyChainMessageHistory(
       replyChain,
