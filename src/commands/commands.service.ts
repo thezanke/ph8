@@ -32,7 +32,7 @@ export class CommandsService {
     this.logger.log(`"${command.commandName}" command registered`);
   }
 
-  private determineIfCommand(messageContent: string) {
+  public determineIfCommand(messageContent: string) {
     const re = new RegExp(
       `^(?:.{1})?${this.discordService.username}(?:.{1})?(?: |$)`,
       'mi',

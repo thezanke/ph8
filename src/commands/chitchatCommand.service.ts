@@ -24,48 +24,30 @@ export class ChitchatCommandService implements Command {
   public commandName = 'chitchat';
   public omitFromListing = true;
 
-  public async execute(message: Message) {
-    if (!this.configService.get('ENABLE_GPT3', false)) {
-      message.reply(`what's up bud?`);
-      return;
-    }
-
-    if (message.reference) {
-      const reference = await message.fetchReference();
-      if (reference?.author.id === this.discordService.userId) return;
-    }
-
-    const messageParts = message.cleanContent.split(' ');
-
-    return this.handleGptChitchat(message, messageParts.slice(1).join(' '));
-  }
-
-  @OnEvent(DISCORD_EVENTS.messageCreate)
-  public async handleMessage(message: Message) {
-    if (!message.reference) return;
-
-    const lastMessage = await message.fetchReference();
-
-    if (lastMessage.author.id !== this.discordService.userId) return;
-
-    if (!this.configService.get('ENABLE_GPT3', false)) {
-      message.reply(`sorry, I'm not my self right now...`);
-      return;
-    }
-
-    return this.handleGptChitchat(message, message.cleanContent.trim());
-  }
-
   private logger = new Logger(ChitchatCommandService.name);
 
   private readonly gptChitchatMaxTokens = Number(
     this.configService.get<string>('CHITCHAT_GPT_MAX_TOKENS', '60'),
   );
 
+  public async execute(message: Message) {
+    if (await this.determineIfMessageIsReply(message)) return;
+    await this.handleChitchatMessage(message);
+  }
+
+  @OnEvent(DISCORD_EVENTS.messageCreate)
+  public async handleMessageCreate(message: Message) {
+    if (await this.determineIfMessageIsReply(message)) {
+      await this.handleChitchatMessage(message);
+    }
+  }
+
   private async buildReplyChainMessageHistory(replyChain: Message[]) {
     return replyChain
       .reverse()
-      .map((m) => this.createChatMessage(m.author.username, m.cleanContent));
+      .map((m) =>
+        this.createChatMessage(m.member?.displayName ?? 'User', m.cleanContent),
+      );
   }
 
   private createChatMessage = (username: string, message: string) => {
@@ -84,6 +66,16 @@ export class ChitchatCommandService implements Command {
       this.createChatMessage(user2, 'Whats up?'),
       this.createChatMessage(botName, 'Just hanging out, relaxing. You?'),
     ];
+  }
+
+  private async determineIfMessageIsReply(message: Message) {
+    if (!message.reference) return false;
+
+    const lastMessage = await message.fetchReference();
+
+    if (lastMessage.author.id !== this.discordService.userId) return false;
+
+    return true;
   }
 
   private getCompletionResponseMessage(response: CompletionResponse) {
@@ -107,7 +99,7 @@ export class ChitchatCommandService implements Command {
     const names: Set<string> = new Set();
     names.add(this.discordService.username ?? 'Ph8');
     [message, ...replyChain].forEach((m) =>
-      names.add(m.author.username ?? 'User'),
+      names.add(m.member?.displayName ?? 'User'),
     );
 
     return Array.from(names);
@@ -132,17 +124,23 @@ export class ChitchatCommandService implements Command {
     return prompt;
   }
 
+  private async handleChitchatMessage(message: Message) {
+    if (this.configService.get('ENABLE_GPT3', false)) {
+      return this.handleGptChitchat(message, message.cleanContent.trim());
+    }
+
+    message.reply(`what's up bud?`);
+  }
+
   private async buildFinalPrompt(message: Message, messageText?: string) {
     return [
       await this.getPromptMessageContext(message),
-      messageText?.length && `${message.author.username}: ${messageText}`,
+      messageText?.length && `${message.member?.displayName}: ${messageText}`,
       `${this.discordService.username}:`,
     ]
       .filter(Boolean)
       .join('\n');
   }
-
-  private;
 
   private async handleGptChitchat(message: Message, messageText?: string) {
     try {
