@@ -27,8 +27,9 @@ export class ChitchatCommandService implements Command {
 
   private logger = new Logger(ChitchatCommandService.name);
 
-  private readonly gptChitchatMaxTokens = Number(
-    this.configService.get<string>('CHITCHAT_GPT_MAX_TOKENS', '60'),
+  private readonly gptChitchatMaxTokens = parseInt(
+    this.configService.get<string>('GPT_CHITCHAT_MAX_TOKENS', '120'),
+    10,
   );
 
   public async execute(message: Message) {
@@ -47,11 +48,14 @@ export class ChitchatCommandService implements Command {
     return replyChain
       .reverse()
       .map((m) =>
-        this.createChatMessage(m.member?.displayName ?? 'User', m.cleanContent),
+        this.createChatMessageLine(
+          m.member?.displayName ?? 'User',
+          m.cleanContent,
+        ),
       );
   }
 
-  private createChatMessage = (username: string, message: string) => {
+  private createChatMessageLine = (username: string, message: string) => {
     return `${username}: ${message}`;
   };
 
@@ -62,12 +66,14 @@ export class ChitchatCommandService implements Command {
     const user2 = names.pop() ?? user1;
 
     return [
-      this.createChatMessage(user1, 'Oh hi, what is your name?'),
-      this.createChatMessage(botName, `Hi! My name is ${botName}.`),
-      this.createChatMessage(user2, 'Whats up?'),
-      this.createChatMessage(botName, 'Just hanging out, relaxing. You?'),
+      this.createChatMessageLine(user1, 'Oh hi, what is your name?'),
+      this.createChatMessageLine(botName, `Hi! My name is ${botName}.`),
+      this.createChatMessageLine(user2, 'Whats up?'),
+      this.createChatMessageLine(botName, 'Just hanging out, relaxing. You?'),
     ];
   }
+
+  // private determineIfTagged(message: Message) {}
 
   private async determineIfMessageIsReply(message: Message) {
     if (!message.reference) return false;
