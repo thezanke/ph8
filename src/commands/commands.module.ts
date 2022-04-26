@@ -9,6 +9,7 @@ import { ChitchatCommandService } from './chitchatCommand.service';
 import { CommandsService } from './commands.service';
 import { FactCheckCommandService } from './factCheckCommand.service';
 import { GoogleCommandService } from './googleCommand.service';
+import { PizzaCommandService } from './pizzaCommand.service';
 import { ScoreCommandService } from './scoreCommand.service';
 import { UnknownCommandService } from './unknownCommand.service';
 
@@ -16,12 +17,13 @@ import { UnknownCommandService } from './unknownCommand.service';
   imports: [ConfigModule, ScoringModule, HttpModule, DiscordModule, GptModule],
   controllers: [],
   providers: [
-    CommandsService,
     ChitchatCommandService,
-    UnknownCommandService,
-    GoogleCommandService,
-    ScoreCommandService,
+    CommandsService,
     FactCheckCommandService,
+    GoogleCommandService,
+    PizzaCommandService,
+    ScoreCommandService,
+    UnknownCommandService,
   ],
   exports: [],
 })
