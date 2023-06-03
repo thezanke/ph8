@@ -52,6 +52,9 @@ export class EnvironmentVariables {
   GPT_API_BASE_URL?: string;
 
   @IsString()
+  GPT_CHITCHAT_SYSTEM_MESSAGE_PREAMBLE: string;
+
+  @IsString()
   @IsOptional()
   GPT_CHITCHAT_MESSAGE_CONTEXT_LIMIT?: string;
 

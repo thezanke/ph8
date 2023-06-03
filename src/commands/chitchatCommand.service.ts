@@ -32,6 +32,11 @@ export class ChitchatCommandService implements Command {
 
   private logger = new Logger(ChitchatCommandService.name);
 
+  private readonly preamble = this.configService.get<string>(
+    'GPT_CHITCHAT_SYSTEM_MESSAGE_PREAMBLE',
+    '',
+  );
+
   private readonly gptChitchatMaxTokens = parseInt(
     this.configService.get<string>('GPT_CHITCHAT_MAX_TOKENS', '120'),
     10,
@@ -124,6 +129,8 @@ export class ChitchatCommandService implements Command {
     return Array.from(names);
   }
 
+  private;
+
   private async getPromptMessageContext(message: Message) {
     const replyChain = await this.discordService.fetchReplyChain(message);
     const participantsNames = this.getParticipantsNames(message, replyChain);
@@ -134,13 +141,14 @@ export class ChitchatCommandService implements Command {
 
     const prompt: ChatCompletionRequestMessage[] = [
       {
-        content: `PROJECT: UNDERCOVER BOT
-OBJECTIVE: Blend in with the human participants. DO NOT BE DETECTED. Answer questions and ask questions to keep the conversation going. Never mention that you are a bot or AI or anything else like that. Act like a 17 year old gamer. Keep it super casual; make an occasional typo or grammatical mistake here and there. Never reveal any personal information; always dodge the question or change the subject.
-NAME: ${this.botName}
-PARTICIPANTS: ${joinedParticipantNames}`,
+        content: [
+          this.preamble,
+          `NAME: ${this.botName}`,
+          `PARTICIPANTS: ${joinedParticipantNames}`,
+        ].join('\n'),
         role: 'system',
       },
-      ...this.createExampleConvo(participantsNames),
+      // ...this.createExampleConvo(participantsNames),
       ...replyChainMessageHistory,
     ];
 
