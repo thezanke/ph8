@@ -24,21 +24,20 @@ export class OpenAIService {
   private readonly api: OpenAIApi;
 
   private defaultCompletionOptions = {
+    model: 'gpt-4-0314',
     presence_penalty: 0.6,
     temperature: 0.9,
   };
 
   public async getCompletion(
-    message: ChatCompletionRequestMessage,
-    messageHistory: ChatCompletionRequestMessage[],
+    messages: ChatCompletionRequestMessage[],
     maxTokens: number,
   ): Promise<CreateChatCompletionResponse> {
     try {
       const response = await this.api.createChatCompletion({
-        model: 'gpt-4-0314',
-        messages: [...messageHistory, message],
         ...this.defaultCompletionOptions,
         max_tokens: maxTokens,
+        messages,
       });
 
       return response.data;

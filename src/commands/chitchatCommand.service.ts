@@ -10,7 +10,6 @@ import {
 import { EnvironmentVariables } from '../config/validate';
 import { DISCORD_EVENTS } from '../discord/constants';
 import { DiscordService } from '../discord/discord.service';
-import { getJoinedStringArray } from '../helpers/getJoinedStringArray';
 import { OpenAIService } from '../openai/openai.service';
 import { CommandsService } from './commands.service';
 import { Command } from './types';
@@ -70,15 +69,9 @@ export class ChitchatCommandService implements Command {
   }
 
   private createUserMessage = (
-    username: string,
-    message: string,
-  ): ChatCompletionRequestMessage => {
-    return {
-      content: message,
-      role: 'user',
-      name: `<@${username}>`,
-    };
-  };
+    name: string,
+    content: string,
+  ): ChatCompletionRequestMessage => ({ role: 'user', content, name });
 
   private createBotMessage = (
     message: string,
@@ -124,7 +117,7 @@ export class ChitchatCommandService implements Command {
       throw new Error('No response message for choice');
     }
 
-    return responseMessageChoice.replace('@', '').trim();
+    return responseMessageChoice;
   }
 
   private async getPromptMessageContext(message: Message) {
@@ -170,19 +163,19 @@ export class ChitchatCommandService implements Command {
       const chatRequestMessage =
         this.createUserChatMessageFromDiscordMessage(message);
 
-      this.logger.debug(
-        'Requesting GPT Completion:\n' + JSON.stringify(chatRequestMessage),
-      );
-
       const replyChainMessageHistory = await this.getPromptMessageContext(
         message,
       );
 
-      console.log(replyChainMessageHistory, chatRequestMessage);
+      const messageChain = [...replyChainMessageHistory, chatRequestMessage];
+
+      this.logger.debug(
+        'Requesting AI Completion\n' +
+          `  Message Chain: ${JSON.stringify(messageChain, null, 2)}`,
+      );
 
       const response = await this.openaiService.getCompletion(
-        chatRequestMessage,
-        replyChainMessageHistory,
+        messageChain,
         this.gptChitchatMaxTokens,
       );
 
