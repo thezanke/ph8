@@ -64,7 +64,7 @@ export class ChitchatCommandService implements Command {
     return replyChain
       .reverse()
       .map((m) =>
-        this.createUserMessage(m.member?.displayName ?? 'User', m.cleanContent),
+        this.createUserMessage(m.member?.id ?? 'unknown_user', m.content),
       );
   }
 
@@ -149,7 +149,7 @@ export class ChitchatCommandService implements Command {
   private createUserChatMessageFromDiscordMessage(
     message: Message,
   ): ChatCompletionRequestMessage {
-    const messageText = message.cleanContent.trim();
+    const messageText = message.content.trim();
 
     return {
       content: messageText,
