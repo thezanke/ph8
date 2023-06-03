@@ -33,13 +33,20 @@ export class ChitchatCommandService implements Command {
   );
 
   public async execute(message: Message) {
-    if (await this.determineIfMessageIsReply(message)) return;
+    const isHandledByMessageCreateHandler =
+      await this.determineIfHandledByMessageCreateHandler(message);
+
+    if (isHandledByMessageCreateHandler) return;
+
     await this.handleChitchatMessage(message);
   }
 
   @OnEvent(DISCORD_EVENTS.messageCreate)
   public async handleMessageCreate(message: Message) {
-    if (await this.determineIfMessageIsReply(message)) {
+    const isReply = await this.determineIfHandledByMessageCreateHandler(
+      message,
+    );
+    if (isReply) {
       await this.handleChitchatMessage(message);
     }
   }
@@ -75,7 +82,7 @@ export class ChitchatCommandService implements Command {
 
   // private determineIfTagged(message: Message) {}
 
-  private async determineIfMessageIsReply(message: Message) {
+  private async determineIfHandledByMessageCreateHandler(message: Message) {
     if (!message.reference) return false;
 
     const lastMessage = await message.fetchReference();
