@@ -27,7 +27,6 @@ export class ChitchatCommandService implements Command {
 
   public commandName = 'chitchat';
   public omitFromListing = true;
-  public botName = this.discordService.username;
 
   private logger = new Logger(ChitchatCommandService.name);
 
@@ -79,7 +78,7 @@ export class ChitchatCommandService implements Command {
     return {
       content: message,
       role: 'assistant',
-      name: this.botName,
+      name: this.discordService.userId,
     };
   };
 
@@ -89,7 +88,9 @@ export class ChitchatCommandService implements Command {
 
     return [
       this.createUserMessage(userId1, 'Oh hi, what is your name?'),
-      this.createBotMessage(`Hi <@${userId1}>! My name is ${this.botName}.`),
+      this.createBotMessage(
+        `Hi <@${userId1}>! I'm ${this.discordService.username}!`,
+      ),
       this.createUserMessage(userId2, 'Whats up?'),
       this.createBotMessage(
         `Just hanging out, relaxing. How about you, <@${userId2}>?`,
@@ -128,7 +129,11 @@ export class ChitchatCommandService implements Command {
 
     const prompt: ChatCompletionRequestMessage[] = [
       {
-        content: [this.preamble, `NAME: ${this.botName}`].join('\n'),
+        content: [
+          this.preamble,
+          `NAME: ${this.discordService.username}`,
+          `ID: ${this.discordService.userId}`,
+        ].join('\n'),
         role: 'system',
       },
       ...this.createExampleConvo(),
