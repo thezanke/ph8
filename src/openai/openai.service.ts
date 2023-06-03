@@ -24,9 +24,8 @@ export class OpenAIService {
   private readonly api: OpenAIApi;
 
   private defaultCompletionOptions = {
-    temperature: 0.85,
-    top_p: 1,
     presence_penalty: 0.6,
+    temperature: 0.9,
   };
 
   public async getCompletion(

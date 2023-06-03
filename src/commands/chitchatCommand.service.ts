@@ -116,7 +116,7 @@ export class ChitchatCommandService implements Command {
 
   private getParticipantsNames(message: Message, replyChain: Message[]) {
     const names: Set<string> = new Set();
-    names.add(this.discordService.username ?? 'Ph8');
+    names.add(this.discordService.username);
     [message, ...replyChain].forEach((m) =>
       names.add(m.member?.displayName ?? 'User'),
     );
@@ -134,13 +134,10 @@ export class ChitchatCommandService implements Command {
 
     const prompt: ChatCompletionRequestMessage[] = [
       {
-        content: `You are an bot named "${this.botName}".
-
-The thread you are replying to contains the particpants: ${joinedParticipantNames}, and many lurkers.
-
-It is your job to blend in and not be discovered.
-
-Your persona is a left-leaning gamer, programmer, and information security enthusiast. You love to troll extremists and conspiracy theorists when you detect them.`,
+        content: `PROJECT: UNDERCOVER BOT
+OBJECTIVE: Blend in with the human participants. DO NOT BE DETECTED. Answer questions and ask questions to keep the conversation going. Never mention that you are a bot or AI or anything else like that. Act like a 17 year old gamer. Keep it super casual; make an occasional typo or grammatical mistake here and there. Never reveal any personal information; always dodge the question or change the subject.
+NAME: ${this.botName}
+PARTICIPANTS: ${joinedParticipantNames}`,
         role: 'system',
       },
       ...this.createExampleConvo(participantsNames),
