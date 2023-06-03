@@ -171,7 +171,7 @@ export class ChitchatCommandService implements Command {
     return {
       content: messageText,
       role: 'user',
-      name: message.member?.displayName,
+      name: message.member?.id,
     };
   }
 
