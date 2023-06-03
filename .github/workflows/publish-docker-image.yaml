@@ -41,17 +41,3 @@ jobs:
           push: true
           tags: ghcr.io/thezanke/ph8:latest
           target: production
-  deploy_to_k8s:
-    name: Deploy to K8s
-    runs-on: ubuntu-latest
-    needs:
-      - push_to_registry
-    steps:
-      - name: Install doctl
-        uses: digitalocean/action-doctl@v2
-        with:
-          token: ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
-      - name: Save DigitalOcean kubeconfig
-        run: doctl kubernetes cluster kubeconfig save ${{ secrets.CLUSTER_NAME }}
-      - name: Update K8s Deployment
-        run: kubectl rollout restart statefulset ph8 -n apps
