@@ -1,4 +1,4 @@
-ARG NODE_VERSION=16.8-alpine
+ARG NODE_VERSION=19.9-buster-slim
 
 FROM node:${NODE_VERSION} AS builder
 WORKDIR /app
