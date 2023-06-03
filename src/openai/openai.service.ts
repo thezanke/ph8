@@ -45,7 +45,7 @@ export class OpenAIService {
     } catch (e) {
       console.error(e);
 
-      if (e.data?.error) console.error(e.data.error);
+      if (e.response?.data?.error) console.error(e.response.data.error);
 
       throw e;
     }

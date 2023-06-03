@@ -69,7 +69,7 @@ export class ChitchatCommandService implements Command {
     return {
       content: message,
       role: 'user',
-      name: username,
+      name: `<@${username}>`,
     };
   };
 
@@ -83,16 +83,17 @@ export class ChitchatCommandService implements Command {
     };
   };
 
-  private createExampleConvo(participantNames: string[]) {
-    const [, ...names] = participantNames;
-    const user1 = names.pop() ?? 'User';
-    const user2 = names.pop() ?? user1;
+  private createExampleConvo() {
+    const userId1 = '112395550829146112';
+    const userId2 = '249711639157407744';
 
     return [
-      this.createUserMessage(user1, 'Oh hi, what is your name?'),
-      this.createBotMessage(`Hi! My name is ${this.botName}.`),
-      this.createUserMessage(user2, 'Whats up?'),
-      this.createBotMessage('Just hanging out, relaxing. You?'),
+      this.createUserMessage(userId1, 'Oh hi, what is your name?'),
+      this.createBotMessage(`Hi <@${userId1}>! My name is ${this.botName}.`),
+      this.createUserMessage(userId2, 'Whats up?'),
+      this.createBotMessage(
+        `Just hanging out, relaxing. How about you, <@${userId2}>?`,
+      ),
     ];
   }
 
@@ -119,36 +120,18 @@ export class ChitchatCommandService implements Command {
     return responseMessageChoice.replace('@', '').trim();
   }
 
-  private getParticipantsNames(message: Message, replyChain: Message[]) {
-    const names: Set<string> = new Set();
-    names.add(this.discordService.username);
-    [message, ...replyChain].forEach((m) =>
-      names.add(m.member?.displayName ?? 'User'),
-    );
-
-    return Array.from(names);
-  }
-
-  private;
-
   private async getPromptMessageContext(message: Message) {
     const replyChain = await this.discordService.fetchReplyChain(message);
-    const participantsNames = this.getParticipantsNames(message, replyChain);
-    const joinedParticipantNames = getJoinedStringArray(participantsNames);
 
     const replyChainMessageHistory =
       this.buildReplyChainMessageHistory(replyChain);
 
     const prompt: ChatCompletionRequestMessage[] = [
       {
-        content: [
-          this.preamble,
-          `NAME: ${this.botName}`,
-          `PARTICIPANTS: ${joinedParticipantNames}`,
-        ].join('\n'),
+        content: [this.preamble, `NAME: ${this.botName}`].join('\n'),
         role: 'system',
       },
-      // ...this.createExampleConvo(participantsNames),
+      ...this.createExampleConvo(),
       ...replyChainMessageHistory,
     ];
 
