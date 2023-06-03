@@ -1,9 +1,9 @@
 import { bold, hyperlink } from '@discordjs/builders';
 import { HttpService } from '@nestjs/axios';
 import { Injectable } from '@nestjs/common';
-import { AxiosResponse } from '@nestjs/common/node_modules/axios';
 import { ConfigService } from '@nestjs/config';
-import { Message, MessageEmbed } from 'discord.js';
+import { AxiosResponse } from 'axios';
+import { APIEmbed, Message } from 'discord.js';
 import { firstValueFrom } from 'rxjs';
 
 import { EnvironmentVariables } from '../config/validate';
@@ -46,7 +46,7 @@ export class FactCheckCommandService implements Command {
 
   private async getEmbedsForQueryString(
     queryString: string,
-  ): Promise<MessageEmbed[] | null> {
+  ): Promise<APIEmbed[] | null> {
     const { data } = await this.fetchFactCheck(queryString as string);
     if (!data.claims?.length) return null;
 
@@ -67,8 +67,8 @@ export class FactCheckCommandService implements Command {
     return output;
   }
 
-  private buildFactCheckClaimEmbeds(claims: FactCheckClaim[]): MessageEmbed[] {
-    const embeds: MessageEmbed[] = [];
+  private buildFactCheckClaimEmbeds(claims: FactCheckClaim[]): APIEmbed[] {
+    const embeds: APIEmbed[] = [];
 
     for (const claim of this.getClaimsForEmbed(claims)) {
       const claimText = this.formatStringWithLength(
@@ -93,7 +93,7 @@ export class FactCheckCommandService implements Command {
         );
       }
 
-      const embed = new MessageEmbed({ description: lines.join('\n') });
+      const embed: APIEmbed = { description: lines.join('\n') };
       embeds.push(embed);
     }
 

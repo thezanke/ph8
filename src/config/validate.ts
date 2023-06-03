@@ -41,15 +41,15 @@ export class EnvironmentVariables {
 
   @Transform(({ value }) => value.toLowerCase() === 'true')
   @IsBoolean()
-  ENABLE_GPT3: string;
+  ENABLE_GPT: string;
 
   @IsString()
   @IsOptional()
-  GPT3_API_SECRET?: string;
+  GPT_API_SECRET?: string;
 
   @IsString()
   @IsOptional()
-  GPT3_API_BASE_URL?: string;
+  GPT_API_BASE_URL?: string;
 
   @IsString()
   @IsOptional()

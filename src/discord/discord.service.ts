@@ -37,7 +37,7 @@ export class DiscordService {
   }
 
   public get username() {
-    return this.discordClient.user?.username;
+    return this.discordClient.user?.username ?? 'ph8';
   }
 
   public async fetchReplyChain(message: Message): Promise<Message[]> {

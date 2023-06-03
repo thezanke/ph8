@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
-import { Message } from 'discord.js';
-import { Snowflake } from 'discord-api-types';
+import { Message, Snowflake } from 'discord.js';
 
+import { DiscordService } from '../discord/discord.service';
 import { ScoringService } from '../scoring/scoring.service';
 import { CommandsService } from './commands.service';
 import { Command } from './types';
@@ -12,6 +12,7 @@ export class ScoreCommandService implements Command {
 
   constructor(
     private readonly scoringService: ScoringService,
+    private readonly discordService: DiscordService,
     commandsService: CommandsService,
   ) {
     commandsService.registerCommand(this);
@@ -28,9 +29,12 @@ export class ScoreCommandService implements Command {
 
   private getCommandUserIds(message: Message) {
     const userIds = [
-      ...message.mentions.users.keys(),
+      ...message.mentions.users
+        .filter((u) => u.username !== this.discordService.username)
+        .keys(),
       ...message.mentions.roles.map((r) => r.tags?.botId),
     ];
+
     if (!userIds.length) userIds.push(message.author.id);
 
     return userIds as Snowflake[];

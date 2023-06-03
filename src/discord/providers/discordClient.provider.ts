@@ -1,5 +1,5 @@
 import { ConfigService } from '@nestjs/config';
-import { Client, Intents } from 'discord.js';
+import { Client } from 'discord.js';
 
 import { EnvironmentVariables } from '../../config/validate';
 
@@ -10,12 +10,13 @@ export const discordClientProvider = {
   useFactory(configService: ConfigService<EnvironmentVariables>) {
     const client = new Client({
       intents: [
-        Intents.FLAGS.DIRECT_MESSAGES,
-        Intents.FLAGS.GUILDS,
-        Intents.FLAGS.GUILD_MESSAGES,
-        Intents.FLAGS.GUILD_MESSAGE_REACTIONS,
+        'DirectMessages',
+        'Guilds',
+        'GuildMessages',
+        'GuildMessageReactions',
       ],
     });
+
     client.login(configService.get('DISCORD_BOT_TOKEN'));
 
     return client;
