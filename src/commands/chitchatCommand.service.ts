@@ -133,6 +133,7 @@ export class ChitchatCommandService implements Command {
           this.preamble,
           `NAME: ${this.discordService.username}`,
           `ID: ${this.discordService.userId}`,
+          `TODAY'S DATE: ${new Date().toISOString()}`,
         ].join('\n'),
         role: 'system',
       },
