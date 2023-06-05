@@ -36,8 +36,13 @@ export class ChitchatCommandService implements Command {
     '',
   );
 
+  private readonly isGptEnabled = this.configService.get<boolean>(
+    'ENABLE_GPT',
+    false,
+  );
+
   private readonly gptChitchatMaxTokens = parseInt(
-    this.configService.get<string>('GPT_CHITCHAT_MAX_TOKENS', '120'),
+    this.configService.get<string>('GPT_CHITCHAT_MAX_TOKENS', '1000'),
     10,
   );
 
@@ -73,32 +78,6 @@ export class ChitchatCommandService implements Command {
     content: string,
   ): ChatCompletionRequestMessage => ({ role: 'user', content, name });
 
-  private createBotMessage = (
-    message: string,
-  ): ChatCompletionRequestMessage => {
-    return {
-      content: message,
-      role: 'assistant',
-      name: this.botName,
-    };
-  };
-
-  private createExampleConvo() {
-    const userId1 = '112395550829146112';
-    const userId2 = '249711639157407744';
-
-    return [
-      this.createUserMessage(userId1, 'Oh hi, what is your name?'),
-      this.createBotMessage(`Hi <@${userId1}>! My name is ${this.botName}.`),
-      this.createUserMessage(userId2, 'Whats up?'),
-      this.createBotMessage(
-        `Just hanging out, relaxing. How about you, <@${userId2}>?`,
-      ),
-    ];
-  }
-
-  // private determineIfTagged(message: Message) {}
-
   private async determineIfHandledByMessageCreateHandler(message: Message) {
     if (!message.reference) return false;
 
@@ -131,7 +110,6 @@ export class ChitchatCommandService implements Command {
         content: [this.preamble, `NAME: ${this.botName}`].join('\n'),
         role: 'system',
       },
-      ...this.createExampleConvo(),
       ...replyChainMessageHistory,
     ];
 
@@ -139,7 +117,7 @@ export class ChitchatCommandService implements Command {
   }
 
   private async handleChitchatMessage(message: Message) {
-    if (this.configService.get('ENABLE_GPT', false)) {
+    if (this.isGptEnabled) {
       return this.handleGptChitchat(message);
     }
 
