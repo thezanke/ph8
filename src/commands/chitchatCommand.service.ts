@@ -4,6 +4,7 @@ import { OnEvent } from '@nestjs/event-emitter';
 import { Message } from 'discord.js';
 import {
   ChatCompletionRequestMessage,
+  ChatCompletionResponseMessage,
   CreateChatCompletionResponse,
 } from 'openai';
 
@@ -65,17 +66,25 @@ export class ChitchatCommandService implements Command {
   }
 
   private buildReplyChainMessageHistory(replyChain: Message[]) {
-    return replyChain
-      .reverse()
-      .map((m) =>
-        this.createUserMessage(m.member?.id ?? 'unknown_user', m.content),
-      );
+    return replyChain.reverse().map((m) => {
+      const memberId = m.member?.id;
+
+      if (memberId === this.discordService.userId) {
+        return this.createBotMessage(m.content);
+      }
+
+      return this.createUserMessage(m.content, memberId);
+    });
   }
 
   private createUserMessage = (
-    name: string,
     content: string,
+    name?: string,
   ): ChatCompletionRequestMessage => ({ role: 'user', content, name });
+
+  private createBotMessage = (
+    content: string,
+  ): ChatCompletionResponseMessage => ({ role: 'assistant', content });
 
   private async determineIfHandledByMessageCreateHandler(message: Message) {
     if (!message.reference) return false;
