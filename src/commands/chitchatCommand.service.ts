@@ -27,7 +27,6 @@ export class ChitchatCommandService implements Command {
 
   public commandName = 'chitchat';
   public omitFromListing = true;
-  public botName = this.discordService.username;
 
   private logger = new Logger(ChitchatCommandService.name);
 
@@ -107,7 +106,12 @@ export class ChitchatCommandService implements Command {
 
     const prompt: ChatCompletionRequestMessage[] = [
       {
-        content: [this.preamble, `NAME: ${this.botName}`].join('\n'),
+        content: [
+          this.preamble,
+          `NAME: ${this.discordService.username}`,
+          `ID: ${this.discordService.userId}`,
+          `TODAY'S DATE: ${new Date().toISOString()}`,
+        ].join('\n'),
         role: 'system',
       },
       ...replyChainMessageHistory,
