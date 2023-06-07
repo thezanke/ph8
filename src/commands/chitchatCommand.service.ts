@@ -82,6 +82,10 @@ export class ChitchatCommandService implements Command {
     name?: string,
   ): ChatCompletionRequestMessage => ({ role: 'user', content, name });
 
+  private createSystemMessage = (
+    content: string,
+  ): ChatCompletionRequestMessage => ({ role: 'system', content });
+
   private createBotMessage = (
     content: string,
   ): ChatCompletionResponseMessage => ({ role: 'assistant', content });
@@ -114,15 +118,14 @@ export class ChitchatCommandService implements Command {
       this.buildReplyChainMessageHistory(replyChain);
 
     const prompt: ChatCompletionRequestMessage[] = [
-      {
-        content: [
+      this.createSystemMessage(
+        [
           this.preamble,
           `NAME: ${this.discordService.username}`,
           `ID: ${this.discordService.userId}`,
           `TODAY'S DATE: ${new Date().toISOString()}`,
         ].join('\n'),
-        role: 'system',
-      },
+      ),
       ...replyChainMessageHistory,
     ];
 
