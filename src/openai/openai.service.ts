@@ -29,6 +29,15 @@ export class OpenAIService {
     temperature: 0.9,
   };
 
+  public async validateWithModerationApi(input: string[] | string) {
+    const response = await this.api.createModeration({
+      model: 'text-moderation-latest',
+      input,
+    });
+
+    return response.data.results.every((result) => !result.flagged);
+  }
+
   public async getCompletion(
     messages: ChatCompletionRequestMessage[],
     maxTokens: number,

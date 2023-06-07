@@ -69,6 +69,8 @@ export class ChitchatCommandService implements Command {
     return replyChain.reverse().map((m) => {
       const memberId = m.member?.id;
 
+      console.log(m);
+
       if (memberId === this.discordService.userId) {
         return this.createBotMessage(m.content);
       }
@@ -114,22 +116,7 @@ export class ChitchatCommandService implements Command {
   private async getPromptMessageContext(message: Message) {
     const replyChain = await this.discordService.fetchReplyChain(message);
 
-    const replyChainMessageHistory =
-      this.buildReplyChainMessageHistory(replyChain);
-
-    const prompt: ChatCompletionRequestMessage[] = [
-      this.createSystemMessage(
-        [
-          this.preamble,
-          `NAME: ${this.discordService.username}`,
-          `ID: ${this.discordService.userId}`,
-          `TODAY'S DATE: ${new Date().toISOString()}`,
-        ].join('\n'),
-      ),
-      ...replyChainMessageHistory,
-    ];
-
-    return prompt;
+    return this.buildReplyChainMessageHistory(replyChain);
   }
 
   private async handleChitchatMessage(message: Message) {
@@ -143,13 +130,7 @@ export class ChitchatCommandService implements Command {
   private createUserChatMessageFromDiscordMessage(
     message: Message,
   ): ChatCompletionRequestMessage {
-    const messageText = message.content.trim();
-
-    return {
-      content: messageText,
-      role: 'user',
-      name: message.member?.id,
-    };
+    return this.createUserMessage(message.content.trim(), message.member?.id);
   }
 
   private async handleGptChitchat(message: Message) {
@@ -157,11 +138,30 @@ export class ChitchatCommandService implements Command {
       const chatRequestMessage =
         this.createUserChatMessageFromDiscordMessage(message);
 
+      const isValidContent = await this.openaiService.validateWithModerationApi(
+        message.content,
+      );
+
+      if (!isValidContent) {
+        return message.reply('Uhhh... B&!');
+      }
+
       const replyChainMessageHistory = await this.getPromptMessageContext(
         message,
       );
 
-      const messageChain = [...replyChainMessageHistory, chatRequestMessage];
+      const messageChain = [
+        this.createSystemMessage(this.preamble),
+        this.createSystemMessage(
+          [
+            `NAME: ${this.discordService.username}`,
+            `ID: ${this.discordService.userId}`,
+            `TODAY'S DATE: ${new Date().toISOString()}`,
+          ].join('\n'),
+        ),
+        ...replyChainMessageHistory,
+        chatRequestMessage,
+      ];
 
       this.logger.debug(
         'Requesting AI Completion\n' +
@@ -177,14 +177,14 @@ export class ChitchatCommandService implements Command {
 
       this.logger.debug('GPT Response:\n' + JSON.stringify(responseMessage));
 
-      message.reply(responseMessage);
+      return message.reply(responseMessage);
     } catch (e) {
       this.logger.error(e);
 
       if (e.response?.status === 429) {
-        message.reply('Out of credits... Please insert token.');
+        return message.reply('Out of credits... Please insert token.');
       } else {
-        message.reply('That one hurt my brain..');
+        return message.reply('That one hurt my brain..');
       }
     }
   }
