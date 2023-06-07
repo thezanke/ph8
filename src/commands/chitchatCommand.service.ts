@@ -69,8 +69,6 @@ export class ChitchatCommandService implements Command {
     return replyChain.reverse().map((m) => {
       const memberId = m.member?.id;
 
-      console.log(m);
-
       if (memberId === this.discordService.userId) {
         return this.createBotMessage(m.content);
       }
