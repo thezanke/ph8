@@ -1,6 +1,6 @@
 import { Message } from 'discord.js';
 
-export interface Command {
+export interface CommandService {
   commandName: string;
 
   /* if true, command will be omitted from commands list reply */

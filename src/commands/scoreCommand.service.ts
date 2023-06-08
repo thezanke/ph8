@@ -4,10 +4,10 @@ import { Message, Snowflake } from 'discord.js';
 import { DiscordService } from '../discord/discord.service';
 import { ScoringService } from '../scoring/scoring.service';
 import { CommandsService } from './commands.service';
-import { Command } from './types/Command';
+import { CommandService } from './types/CommandService';
 
 @Injectable()
-export class ScoreCommandService implements Command {
+export class ScoreCommandService implements CommandService {
   public commandName = 'score';
 
   constructor(

@@ -15,10 +15,10 @@ import { DiscordService } from '../discord/discord.service';
 import { OpenAIChatService } from '../openai/openai-chat.service';
 import { OpenAIModerationService } from '../openai/openai-moderation.service';
 import { CommandsService } from './commands.service';
-import { Command } from './types/Command';
+import { CommandService } from './types/CommandService';
 
 @Injectable()
-export class ChitchatCommandService implements Command {
+export class ChitchatCommandService implements CommandService {
   constructor(
     commandsService: CommandsService,
     private readonly openaiModeration: OpenAIModerationService,

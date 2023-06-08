@@ -2,10 +2,10 @@ import { Injectable } from '@nestjs/common';
 import { Message } from 'discord.js';
 
 import { CommandsService } from './commands.service';
-import { Command } from './types/Command';
+import { CommandService } from './types/CommandService';
 
 @Injectable()
-export class UnknownCommandService implements Command {
+export class UnknownCommandService implements CommandService {
   public commandName = 'unknown';
   public omitFromListing = true;
 

@@ -8,7 +8,7 @@ import { firstValueFrom } from 'rxjs';
 
 import { EnvironmentVariables } from '../config/validate';
 import { CommandsService } from './commands.service';
-import { Command } from './types/Command';
+import { CommandService } from './types/CommandService';
 import {
   FactCheckClaim,
   FactCheckClaimReview,
@@ -19,7 +19,7 @@ const MAX_CLAIM_LENGTH = 1800;
 const MAX_VERDICT_LENGTH = 200;
 
 @Injectable()
-export class FactCheckCommandService implements Command {
+export class FactCheckCommandService implements CommandService {
   constructor(
     private readonly httpService: HttpService,
     private readonly configService: ConfigService<EnvironmentVariables>,

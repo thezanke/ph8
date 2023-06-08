@@ -4,7 +4,7 @@ import { Message } from 'discord.js';
 
 import { DISCORD_EVENTS } from '../discord/constants';
 import { DiscordService } from '../discord/discord.service';
-import { Command } from './types/Command';
+import { CommandService } from './types/CommandService';
 
 const DEFAULT_COMMAND = 'chitchat';
 const UNKNOWN_COMMAND = 'chitchat';
@@ -12,7 +12,7 @@ const UNKNOWN_COMMAND = 'chitchat';
 @Injectable()
 export class CommandsService {
   private readonly logger = new Logger(CommandsService.name);
-  private readonly commands: Record<string, Command> = {};
+  private readonly commands: Record<string, CommandService> = {};
 
   constructor(private readonly discordService: DiscordService) {}
 
@@ -22,7 +22,7 @@ export class CommandsService {
     await this.handleCommand(message);
   }
 
-  public registerCommand(command: Command) {
+  public registerCommand(command: CommandService) {
     if (this.commands[command.commandName]) {
       this.logger.error(`"${command.commandName}" already registered.`);
       return;
