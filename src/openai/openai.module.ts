@@ -2,11 +2,12 @@ import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 
 import { openaiProvider } from './openai.provider';
-import { OpenAIService } from './openai.service';
+import { OpenAIChatService } from './openai-chat.service';
+import { OpenAIModerationService } from './openai-moderation.service';
 
 @Module({
   imports: [ConfigModule],
-  providers: [openaiProvider, OpenAIService],
-  exports: [OpenAIService],
+  providers: [openaiProvider, OpenAIChatService, OpenAIModerationService],
+  exports: [OpenAIChatService, OpenAIModerationService],
 })
 export class OpenAIModule {}

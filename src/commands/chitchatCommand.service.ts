@@ -1,6 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { OnEvent } from '@nestjs/event-emitter';
+import { stripIndent } from 'common-tags';
 import { Message } from 'discord.js';
 import {
   ChatCompletionRequestMessage,
@@ -11,7 +12,8 @@ import {
 import { EnvironmentVariables } from '../config/validate';
 import { DISCORD_EVENTS } from '../discord/constants';
 import { DiscordService } from '../discord/discord.service';
-import { OpenAIService } from '../openai/openai.service';
+import { OpenAIChatService } from '../openai/openai-chat.service';
+import { OpenAIModerationService } from '../openai/openai-moderation.service';
 import { CommandsService } from './commands.service';
 import { Command } from './types';
 
@@ -19,7 +21,8 @@ import { Command } from './types';
 export class ChitchatCommandService implements Command {
   constructor(
     commandsService: CommandsService,
-    private readonly openaiService: OpenAIService,
+    private readonly openaiModeration: OpenAIModerationService,
+    private readonly openaiChat: OpenAIChatService,
     private readonly discordService: DiscordService,
     private readonly configService: ConfigService<EnvironmentVariables>,
   ) {
@@ -60,6 +63,7 @@ export class ChitchatCommandService implements Command {
     const isReply = await this.determineIfHandledByMessageCreateHandler(
       message,
     );
+
     if (isReply) {
       await this.handleChitchatMessage(message);
     }
@@ -136,7 +140,7 @@ export class ChitchatCommandService implements Command {
       const chatRequestMessage =
         this.createUserChatMessageFromDiscordMessage(message);
 
-      const isValidContent = await this.openaiService.validateWithModerationApi(
+      const isValidContent = await this.openaiModeration.validateInput(
         message.content,
       );
 
@@ -150,30 +154,21 @@ export class ChitchatCommandService implements Command {
 
       const messageChain = [
         this.createSystemMessage(this.preamble),
-        this.createSystemMessage(
-          [
-            `NAME: ${this.discordService.username}`,
-            `ID: ${this.discordService.userId}`,
-            `TODAY'S DATE: ${new Date().toISOString()}`,
-          ].join('\n'),
-        ),
+        this.createSystemMessage(stripIndent`
+          NAME: ${this.discordService.username}
+          ID: ${this.discordService.userId}
+          TODAY'S DATE: ${new Date().toISOString()}
+        `),
         ...replyChainMessageHistory,
         chatRequestMessage,
       ];
 
-      this.logger.debug(
-        'Requesting AI Completion\n' +
-          `  Message Chain: ${JSON.stringify(messageChain, null, 2)}`,
-      );
-
-      const response = await this.openaiService.getCompletion(
+      const response = await this.openaiChat.getCompletion(
         messageChain,
         this.gptChitchatMaxTokens,
       );
 
       const responseMessage = this.getCompletionResponseMessage(response);
-
-      this.logger.debug('GPT Response:\n' + JSON.stringify(responseMessage));
 
       return message.reply(responseMessage);
     } catch (e) {

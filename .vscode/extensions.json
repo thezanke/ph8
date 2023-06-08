@@ -1,3 +1,7 @@
 {
-  "recommendations": ["esbenp.prettier-vscode", "dbaeumer.vscode-eslint", "eg2.vscode-npm-script"]
+  "recommendations": [
+    "dbaeumer.vscode-eslint",
+    "eg2.vscode-npm-script",
+    "ms-azuretools.vscode-docker"
+  ]
 }
