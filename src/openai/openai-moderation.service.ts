@@ -42,13 +42,11 @@ export class OpenAIModerationService {
       return isValidContent;
     } catch (e) {
       if (e.response) {
-        this.logger.error(
-          stripIndent(`
-            Moderation Error Response:
-              Status: ${e.response.status}
-              Data: ${JSON.stringify(e.response.data)}
-          `),
-        );
+        this.logger.error(stripIndent`
+          Moderation Error Response:
+            Status: ${e.response.status}
+            Data: ${JSON.stringify(e.response.data)}
+        `);
       } else {
         this.logger.error(`Moderation Error: ${e.message}`);
       }

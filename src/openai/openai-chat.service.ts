@@ -79,13 +79,11 @@ export class OpenAIChatService {
       return data;
     } catch (e) {
       if (e.response) {
-        this.logger.error(
-          stripIndent(`
-            Chat Completion Error Response:
-              Status: ${e.response.status}
-              Data: ${JSON.stringify(e.response.data)}
-          `),
-        );
+        this.logger.error(stripIndent`
+          Chat Completion Error Response:
+            Status: ${e.response.status}
+            Data: ${JSON.stringify(e.response.data)}
+        `);
       } else {
         this.logger.error(`Chat Completion Error: ${e.message}`);
       }
