@@ -1,8 +1,12 @@
 import { Inject, Injectable, Logger } from '@nestjs/common';
 import { stripIndent } from 'common-tags';
-import { OpenAIApi } from 'openai';
+import {
+  CreateModerationRequest,
+  CreateModerationRequestInput,
+  OpenAIApi,
+} from 'openai';
 
-const defaultRequestOptions = {
+const defaultRequestOptions: Partial<CreateModerationRequest> = {
   model: 'text-moderation-latest',
 };
 
@@ -12,8 +16,8 @@ export class OpenAIModerationService {
   private readonly api: OpenAIApi;
   private readonly logger = new Logger(OpenAIModerationService.name);
 
-  public async validateInput(input: string[] | string) {
-    const moderationRequest = {
+  public async validateInput(input: CreateModerationRequestInput) {
+    const moderationRequest: CreateModerationRequest = {
       ...defaultRequestOptions,
       input,
     };
