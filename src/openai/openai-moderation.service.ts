@@ -33,11 +33,9 @@ export class OpenAIModerationService {
         (result) => !result.flagged,
       );
 
-      if (!isValidContent) {
-        this.logger.verbose(
-          `Moderation Failure Response: ${JSON.stringify(response.data)}`,
-        );
-      }
+      this.logger.verbose(
+        `Moderation Response: ${JSON.stringify(response.data)}`,
+      );
 
       return isValidContent;
     } catch (e) {
