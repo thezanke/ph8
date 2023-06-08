@@ -8,11 +8,8 @@ import {
   OpenAIApi,
 } from 'openai';
 
-type CreateChatCompletionRequestDefaultOptions =
-  Partial<CreateChatCompletionRequest> &
-    Pick<CreateChatCompletionRequest, 'model'>;
-
-const defaultRequestOptions: CreateChatCompletionRequestDefaultOptions = {
+const defaultRequestOptions: Partial<CreateChatCompletionRequest> &
+  Pick<CreateChatCompletionRequest, 'model'> = {
   model: 'gpt-4-0314',
   presence_penalty: 0.6,
   temperature: 0.9,

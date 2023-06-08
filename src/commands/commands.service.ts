@@ -4,7 +4,7 @@ import { Message } from 'discord.js';
 
 import { DISCORD_EVENTS } from '../discord/constants';
 import { DiscordService } from '../discord/discord.service';
-import { Command } from './types';
+import { Command } from './types/Command';
 
 const DEFAULT_COMMAND = 'chitchat';
 const UNKNOWN_COMMAND = 'chitchat';

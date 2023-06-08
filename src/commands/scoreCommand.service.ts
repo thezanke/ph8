@@ -4,7 +4,7 @@ import { Message, Snowflake } from 'discord.js';
 import { DiscordService } from '../discord/discord.service';
 import { ScoringService } from '../scoring/scoring.service';
 import { CommandsService } from './commands.service';
-import { Command } from './types';
+import { Command } from './types/Command';
 
 @Injectable()
 export class ScoreCommandService implements Command {

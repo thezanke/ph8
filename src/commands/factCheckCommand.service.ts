@@ -8,12 +8,12 @@ import { firstValueFrom } from 'rxjs';
 
 import { EnvironmentVariables } from '../config/validate';
 import { CommandsService } from './commands.service';
+import { Command } from './types/Command';
 import {
   FactCheckClaim,
   FactCheckClaimReview,
   FactCheckResults,
-} from './datatypes/factCheckResults';
-import { Command } from './types';
+} from './types/FactCheckResults';
 
 const MAX_CLAIM_LENGTH = 1800;
 const MAX_VERDICT_LENGTH = 200;

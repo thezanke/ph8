@@ -15,7 +15,7 @@ import { DiscordService } from '../discord/discord.service';
 import { OpenAIChatService } from '../openai/openai-chat.service';
 import { OpenAIModerationService } from '../openai/openai-moderation.service';
 import { CommandsService } from './commands.service';
-import { Command } from './types';
+import { Command } from './types/Command';
 
 @Injectable()
 export class ChitchatCommandService implements Command {

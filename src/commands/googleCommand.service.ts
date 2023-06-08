@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { Message } from 'discord.js';
 
 import { CommandsService } from './commands.service';
-import { Command } from './types';
+import { Command } from './types/Command';
 
 @Injectable()
 export class GoogleCommandService implements Command {
