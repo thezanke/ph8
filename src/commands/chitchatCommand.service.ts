@@ -137,6 +137,20 @@ export class ChitchatCommandService implements CommandService {
     return this.createUserMessage(message.content.trim(), message.member?.id);
   }
 
+  private async handleResponseMessages(
+    message: Message,
+    responseMessages: string[],
+  ) {
+    try {
+      for (const responseMessage of responseMessages) {
+        await message.reply(responseMessage);
+      }
+    } catch (e) {
+      this.logger.error(e);
+      throw e;
+    }
+  }
+
   private async handleGptChitchat(message: Message) {
     try {
       const chatRequestMessage =
@@ -147,8 +161,7 @@ export class ChitchatCommandService implements CommandService {
       );
 
       if (!isValidContent) {
-        message.reply('Uhhh... B&!');
-        return;
+        return message.reply('Uhhh... B&!');
       }
 
       const replyChainMessageHistory = await this.getPromptMessageContext(
@@ -173,15 +186,13 @@ export class ChitchatCommandService implements CommandService {
 
       const responseMessages = this.getCompletionResponseMessages(response);
 
-      for (const responseMessage of responseMessages) {
-        await message.reply(responseMessage);
-      }
+      return this.handleResponseMessages(message, responseMessages);
     } catch (e) {
       if (e.response?.status === HttpStatus.TOO_MANY_REQUESTS) {
-        message.reply('Out of credits... Please insert token.');
-      } else {
-        message.reply('That one hurt my brain..');
+        return message.reply('Out of credits... Please insert token.');
       }
+
+      return message.reply('That one hurt my brain..');
     }
   }
 }
