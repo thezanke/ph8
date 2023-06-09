@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { HttpStatus, Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { OnEvent } from '@nestjs/event-emitter';
 import { stripIndent } from 'common-tags';
@@ -104,7 +104,9 @@ export class ChitchatCommandService implements CommandService {
     return true;
   }
 
-  private getCompletionResponseMessage(response: CreateChatCompletionResponse) {
+  private getCompletionResponseMessages(
+    response: CreateChatCompletionResponse,
+  ) {
     const [choice] = response.choices;
     const responseMessageChoice = choice.message?.content;
 
@@ -112,7 +114,7 @@ export class ChitchatCommandService implements CommandService {
       throw new Error('No response message for choice');
     }
 
-    return responseMessageChoice;
+    return responseMessageChoice.split('\n===\n');
   }
 
   private async getPromptMessageContext(message: Message) {
@@ -145,7 +147,8 @@ export class ChitchatCommandService implements CommandService {
       );
 
       if (!isValidContent) {
-        return message.reply('Uhhh... B&!');
+        message.reply('Uhhh... B&!');
+        return;
       }
 
       const replyChainMessageHistory = await this.getPromptMessageContext(
@@ -168,16 +171,16 @@ export class ChitchatCommandService implements CommandService {
         this.gptChitchatMaxTokens,
       );
 
-      const responseMessage = this.getCompletionResponseMessage(response);
+      const responseMessages = this.getCompletionResponseMessages(response);
 
-      return message.reply(responseMessage);
+      for (const responseMessage of responseMessages) {
+        await message.reply(responseMessage);
+      }
     } catch (e) {
-      this.logger.error(e);
-
-      if (e.response?.status === 429) {
-        return message.reply('Out of credits... Please insert token.');
+      if (e.response?.status === HttpStatus.TOO_MANY_REQUESTS) {
+        message.reply('Out of credits... Please insert token.');
       } else {
-        return message.reply('That one hurt my brain..');
+        message.reply('That one hurt my brain..');
       }
     }
   }
