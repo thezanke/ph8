@@ -5,7 +5,6 @@ import {
   ChatCompletionRequestMessage,
   ChatCompletionResponseMessage,
   CreateChatCompletionRequest,
-  CreateChatCompletionResponse,
   OpenAIApi,
 } from 'openai';
 
