@@ -3,16 +3,11 @@ import { ConfigService } from '@nestjs/config';
 import { OnEvent } from '@nestjs/event-emitter';
 import { stripIndent } from 'common-tags';
 import { Message } from 'discord.js';
-import {
-  ChatCompletionRequestMessage,
-  ChatCompletionResponseMessage,
-  CreateChatCompletionResponse,
-} from 'openai';
 
 import { EnvironmentVariables } from '../config/validate';
 import { DISCORD_EVENTS } from '../discord/constants';
 import { DiscordService } from '../discord/discord.service';
-import { OpenAIChatService } from '../openai/openai-chat.service';
+import { LangchainService } from '../langchain/langchain.service';
 import { OpenAIModerationService } from '../openai/openai-moderation.service';
 import { CommandsService } from './commands.service';
 import { CommandService } from './types/CommandService';
@@ -22,7 +17,7 @@ export class ChitchatCommandService implements CommandService {
   constructor(
     commandsService: CommandsService,
     private readonly openaiModeration: OpenAIModerationService,
-    private readonly openaiChat: OpenAIChatService,
+    private readonly aiCompletionService: LangchainService,
     private readonly discordService: DiscordService,
     private readonly configService: ConfigService<EnvironmentVariables>,
   ) {
@@ -69,10 +64,10 @@ export class ChitchatCommandService implements CommandService {
       const memberId = m.member?.id;
 
       if (memberId === this.discordService.userId) {
-        return this.openaiChat.createAssistantMessage(m.content);
+        return this.aiCompletionService.createAssistantMessage(m.content);
       }
 
-      return this.openaiChat.createUserMessage(m.content, memberId);
+      return this.aiCompletionService.createUserMessage(m.content, memberId);
     });
   }
 
@@ -104,10 +99,8 @@ export class ChitchatCommandService implements CommandService {
     message.reply(`what's up bud?`);
   }
 
-  private createUserChatMessageFromDiscordMessage(
-    message: Message,
-  ): ChatCompletionRequestMessage {
-    return this.openaiChat.createUserMessage(
+  private createUserChatMessageFromDiscordMessage(message: Message) {
+    return this.aiCompletionService.createUserMessage(
       message.content.trim(),
       message.member?.id,
     );
@@ -145,8 +138,8 @@ export class ChitchatCommandService implements CommandService {
       );
 
       const messageChain = [
-        this.openaiChat.createSystemMessage(this.preamble),
-        this.openaiChat.createSystemMessage(stripIndent`
+        this.aiCompletionService.createSystemMessage(this.preamble),
+        this.aiCompletionService.createSystemMessage(stripIndent`
           NAME: ${this.discordService.username}
           ID: ${this.discordService.userId}
           TODAY'S DATE: ${new Date().toISOString()}
@@ -155,7 +148,9 @@ export class ChitchatCommandService implements CommandService {
         chatRequestMessage,
       ];
 
-      const response = await this.openaiChat.getCompletion(messageChain);
+      const response = await this.aiCompletionService.getCompletion(
+        messageChain,
+      );
       const responseMessages = this.getCompletionResponseMessages(response);
 
       return this.handleResponseMessages(message, responseMessages);

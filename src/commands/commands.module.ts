@@ -3,6 +3,7 @@ import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 
 import { DiscordModule } from '../discord/discord.module';
+import { LangchainModule } from '../langchain/langchain.module';
 import { OpenAIModule } from '../openai/openai.module';
 import { ScoringModule } from '../scoring/scoring.module';
 import { ChitchatCommandService } from './chitchatCommand.service';
@@ -20,6 +21,7 @@ import { UnknownCommandService } from './unknownCommand.service';
     HttpModule,
     DiscordModule,
     OpenAIModule,
+    LangchainModule,
   ],
   controllers: [],
   providers: [

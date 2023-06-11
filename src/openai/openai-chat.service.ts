@@ -8,7 +8,7 @@ import {
   OpenAIApi,
 } from 'openai';
 
-import { AiChatService } from '../types/AiChatSerivce.interface';
+import { AiCompletionService } from '../types/AiCompletionService.interface';
 
 const defaultRequestOptions: Partial<CreateChatCompletionRequest> &
   Pick<CreateChatCompletionRequest, 'model'> = {
@@ -18,7 +18,7 @@ const defaultRequestOptions: Partial<CreateChatCompletionRequest> &
 };
 
 @Injectable()
-export class OpenAIChatService implements AiChatService {
+export class OpenAIChatService implements AiCompletionService {
   constructor(private readonly configService: ConfigService) {}
 
   @Inject(OpenAIApi)
@@ -39,8 +39,10 @@ export class OpenAIChatService implements AiChatService {
     return { role, content, name };
   };
 
-  public createUserMessage = (content, name?) => {
-    return this.createCompletionMessage('user', content, name);
+  public createAssistantMessage = (
+    content: ChatCompletionResponseMessage['content'],
+  ) => {
+    return this.createCompletionMessage('assistant', content);
   };
 
   public createSystemMessage = (
@@ -49,10 +51,11 @@ export class OpenAIChatService implements AiChatService {
     return this.createCompletionMessage('system', content);
   };
 
-  public createAssistantMessage = (
-    content: ChatCompletionResponseMessage['content'],
+  public createUserMessage = (
+    content: ChatCompletionRequestMessage['content'],
+    name?: ChatCompletionRequestMessage['name'],
   ) => {
-    return this.createCompletionMessage('assistant', content);
+    return this.createCompletionMessage('user', content, name);
   };
 
   public async getCompletion(messages: ChatCompletionRequestMessage[]) {
@@ -63,7 +66,7 @@ export class OpenAIChatService implements AiChatService {
     };
 
     this.logger.verbose(
-      `Requesting Chat Completion: ${JSON.stringify(chatCompletionRequest)}`,
+      `Requesting Completion: ${JSON.stringify(chatCompletionRequest)}`,
     );
 
     try {
@@ -75,7 +78,7 @@ export class OpenAIChatService implements AiChatService {
 
       const { data } = response;
 
-      this.logger.verbose(`Completion Response: ${JSON.stringify(data)}`);
+      this.logger.verbose(`Completion Result: ${JSON.stringify(data)}`);
 
       const [choice] = data.choices;
       const choiceMessageContent = choice.message?.content;
