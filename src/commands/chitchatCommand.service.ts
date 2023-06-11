@@ -44,11 +44,6 @@ export class ChitchatCommandService implements CommandService {
     false,
   );
 
-  private readonly gptChitchatMaxTokens = parseInt(
-    this.configService.get<string>('GPT_CHITCHAT_MAX_TOKENS', '1000'),
-    10,
-  );
-
   public async execute(message: Message) {
     const isHandledByMessageCreateHandler =
       await this.determineIfHandledByMessageCreateHandler(message);
@@ -74,25 +69,12 @@ export class ChitchatCommandService implements CommandService {
       const memberId = m.member?.id;
 
       if (memberId === this.discordService.userId) {
-        return this.createBotMessage(m.content);
+        return this.openaiChat.createAssistantMessage(m.content);
       }
 
-      return this.createUserMessage(m.content, memberId);
+      return this.openaiChat.createUserMessage(m.content, memberId);
     });
   }
-
-  private createUserMessage = (
-    content: string,
-    name?: string,
-  ): ChatCompletionRequestMessage => ({ role: 'user', content, name });
-
-  private createSystemMessage = (
-    content: string,
-  ): ChatCompletionRequestMessage => ({ role: 'system', content });
-
-  private createBotMessage = (
-    content: string,
-  ): ChatCompletionResponseMessage => ({ role: 'assistant', content });
 
   private async determineIfHandledByMessageCreateHandler(message: Message) {
     if (!message.reference) return false;
@@ -104,17 +86,8 @@ export class ChitchatCommandService implements CommandService {
     return true;
   }
 
-  private getCompletionResponseMessages(
-    response: CreateChatCompletionResponse,
-  ) {
-    const [choice] = response.choices;
-    const responseMessageChoice = choice.message?.content;
-
-    if (!responseMessageChoice) {
-      throw new Error('No response message for choice');
-    }
-
-    return responseMessageChoice.split('\n===\n');
+  private getCompletionResponseMessages(message: string) {
+    return message.split('\n===\n');
   }
 
   private async getPromptMessageContext(message: Message) {
@@ -134,7 +107,10 @@ export class ChitchatCommandService implements CommandService {
   private createUserChatMessageFromDiscordMessage(
     message: Message,
   ): ChatCompletionRequestMessage {
-    return this.createUserMessage(message.content.trim(), message.member?.id);
+    return this.openaiChat.createUserMessage(
+      message.content.trim(),
+      message.member?.id,
+    );
   }
 
   private async handleResponseMessages(
@@ -169,8 +145,8 @@ export class ChitchatCommandService implements CommandService {
       );
 
       const messageChain = [
-        this.createSystemMessage(this.preamble),
-        this.createSystemMessage(stripIndent`
+        this.openaiChat.createSystemMessage(this.preamble),
+        this.openaiChat.createSystemMessage(stripIndent`
           NAME: ${this.discordService.username}
           ID: ${this.discordService.userId}
           TODAY'S DATE: ${new Date().toISOString()}
@@ -179,11 +155,7 @@ export class ChitchatCommandService implements CommandService {
         chatRequestMessage,
       ];
 
-      const response = await this.openaiChat.getCompletion(
-        messageChain,
-        this.gptChitchatMaxTokens,
-      );
-
+      const response = await this.openaiChat.getCompletion(messageChain);
       const responseMessages = this.getCompletionResponseMessages(response);
 
       return this.handleResponseMessages(message, responseMessages);

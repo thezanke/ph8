@@ -1,4 +1,5 @@
 import { Inject, Injectable, Logger } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { stripIndent } from 'common-tags';
 import {
   ChatCompletionRequestMessage,
@@ -8,6 +9,8 @@ import {
   OpenAIApi,
 } from 'openai';
 
+import { AiChatService } from '../types/AiChatSerivce.interface';
+
 const defaultRequestOptions: Partial<CreateChatCompletionRequest> &
   Pick<CreateChatCompletionRequest, 'model'> = {
   model: 'gpt-4-0314',
@@ -16,10 +19,18 @@ const defaultRequestOptions: Partial<CreateChatCompletionRequest> &
 };
 
 @Injectable()
-export class OpenAIChatService {
+export class OpenAIChatService implements AiChatService {
+  constructor(private readonly configService: ConfigService) {}
+
   @Inject(OpenAIApi)
   private readonly api: OpenAIApi;
+
   private readonly logger = new Logger(OpenAIChatService.name);
+
+  private readonly gptChitchatMaxTokens = parseInt(
+    this.configService.get<string>('GPT_CHITCHAT_MAX_TOKENS', '1000'),
+    10,
+  );
 
   private createCompletionMessage = (
     role: ChatCompletionRequestMessage['role'],
@@ -29,10 +40,7 @@ export class OpenAIChatService {
     return { role, content, name };
   };
 
-  public createUserMessage = (
-    content: ChatCompletionRequestMessage['content'],
-    name?: ChatCompletionRequestMessage['name'],
-  ) => {
+  public createUserMessage = (content, name?) => {
     return this.createCompletionMessage('user', content, name);
   };
 
@@ -44,17 +52,14 @@ export class OpenAIChatService {
 
   public createAssistantMessage = (
     content: ChatCompletionResponseMessage['content'],
-  ): ChatCompletionResponseMessage => {
+  ) => {
     return this.createCompletionMessage('assistant', content);
   };
 
-  public async getCompletion(
-    messages: ChatCompletionRequestMessage[],
-    maxTokens: number,
-  ): Promise<CreateChatCompletionResponse> {
+  public async getCompletion(messages: ChatCompletionRequestMessage[]) {
     const chatCompletionRequest: CreateChatCompletionRequest = {
       ...defaultRequestOptions,
-      max_tokens: maxTokens,
+      max_tokens: this.gptChitchatMaxTokens,
       messages,
     };
 
@@ -65,7 +70,7 @@ export class OpenAIChatService {
     try {
       const response = await this.api.createChatCompletion({
         ...defaultRequestOptions,
-        max_tokens: maxTokens,
+        max_tokens: this.gptChitchatMaxTokens,
         messages,
       });
 
@@ -73,7 +78,14 @@ export class OpenAIChatService {
 
       this.logger.verbose(`Completion Response: ${JSON.stringify(data)}`);
 
-      return data;
+      const [choice] = data.choices;
+      const choiceMessageContent = choice.message?.content;
+
+      if (!choiceMessageContent) {
+        throw new Error('No response message for choice');
+      }
+
+      return choiceMessageContent;
     } catch (e) {
       if (e.response) {
         this.logger.error(stripIndent`
