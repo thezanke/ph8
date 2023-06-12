@@ -33,9 +33,7 @@ export class LangchainService implements AiCompletionService {
   }
 
   public async getCompletion(prompt: BaseChatMessage[]) {
-    this.logger.log(
-      `Requesting Completion: ${JSON.stringify(prompt, null, 2)}`,
-    );
+    this.logger.log(`Requesting Completion: ${JSON.stringify(prompt)}`);
 
     try {
       const result = await this.ai.call(prompt);
