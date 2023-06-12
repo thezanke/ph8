@@ -14,6 +14,7 @@ export const discordClientProvider = {
         'Guilds',
         'GuildMessages',
         'GuildMessageReactions',
+        'MessageContent',
       ],
     });
 
