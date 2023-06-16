@@ -12,7 +12,7 @@ import { AiCompletionService } from '../types/AiCompletionService.interface';
 
 const defaultRequestOptions: Partial<CreateChatCompletionRequest> &
   Pick<CreateChatCompletionRequest, 'model'> = {
-  model: 'gpt-4-0314',
+  model: 'gpt-4',
   presence_penalty: 0.6,
   temperature: 0.9,
 };
@@ -29,6 +29,11 @@ export class OpenAIChatService implements AiCompletionService {
   private readonly gptChitchatMaxTokens = parseInt(
     this.configService.get<string>('GPT_CHITCHAT_MAX_TOKENS', '1000'),
     10,
+  );
+
+  private readonly gptChitchatModel = this.configService.get<string>(
+    'GPT_CHITCHAT_MODEL',
+    defaultRequestOptions.model,
   );
 
   private createCompletionMessage = (
@@ -61,6 +66,7 @@ export class OpenAIChatService implements AiCompletionService {
   public async getCompletion(messages: ChatCompletionRequestMessage[]) {
     const chatCompletionRequest: CreateChatCompletionRequest = {
       ...defaultRequestOptions,
+      model: this.gptChitchatModel,
       max_tokens: this.gptChitchatMaxTokens,
       messages,
     };
@@ -70,11 +76,9 @@ export class OpenAIChatService implements AiCompletionService {
     );
 
     try {
-      const response = await this.api.createChatCompletion({
-        ...defaultRequestOptions,
-        max_tokens: this.gptChitchatMaxTokens,
-        messages,
-      });
+      const response = await this.api.createChatCompletion(
+        chatCompletionRequest,
+      );
 
       const { data } = response;
 
