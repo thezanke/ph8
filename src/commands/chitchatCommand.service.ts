@@ -7,7 +7,7 @@ import { Message } from 'discord.js';
 import { EnvironmentVariables } from '../config/validate';
 import { DISCORD_EVENTS } from '../discord/constants';
 import { DiscordService } from '../discord/discord.service';
-import { LangchainService } from '../langchain/langchain.service';
+import { OpenAIChatService } from '../openai/openai-chat.service';
 import { OpenAIModerationService } from '../openai/openai-moderation.service';
 import { CommandsService } from './commands.service';
 import { CommandService } from './types/CommandService';
@@ -17,7 +17,7 @@ export class ChitchatCommandService implements CommandService {
   constructor(
     commandsService: CommandsService,
     private readonly openaiModeration: OpenAIModerationService,
-    private readonly aiCompletionService: LangchainService,
+    private readonly aiCompletionService: OpenAIChatService,
     private readonly discordService: DiscordService,
     private readonly configService: ConfigService<EnvironmentVariables>,
   ) {
