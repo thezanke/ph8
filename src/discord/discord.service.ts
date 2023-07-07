@@ -40,6 +40,10 @@ export class DiscordService {
     return this.discordClient.user?.username ?? 'ph8';
   }
 
+  public get user() {
+    return this.discordClient.user;
+  }
+
   public async fetchReplyChain(message: Message): Promise<Message[]> {
     const replyChain: Message[] = [];
     let m = message;

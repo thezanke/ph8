@@ -3,7 +3,6 @@ import { ConfigService } from '@nestjs/config';
 import { OnEvent } from '@nestjs/event-emitter';
 import { stripIndent } from 'common-tags';
 import { Message } from 'discord.js';
-import { concat } from 'rxjs';
 
 import { EnvironmentVariables } from '../config/validate';
 import { DISCORD_EVENTS } from '../discord/constants';
@@ -12,6 +11,19 @@ import { OpenAIChatService } from '../openai/openai-chat.service';
 import { OpenAIModerationService } from '../openai/openai-moderation.service';
 import { CommandsService } from './commands.service';
 import { CommandService } from './types/CommandService';
+
+const pick = <T extends Record<string, unknown>, K extends keyof T>(
+  obj: T,
+  keys: K[],
+) => {
+  const ret = {} as Pick<T, K>;
+
+  keys.forEach((key) => {
+    ret[key] = obj[key];
+  });
+
+  return ret;
+};
 
 @Injectable()
 export class ChitchatCommandService implements CommandService {
@@ -60,7 +72,7 @@ export class ChitchatCommandService implements CommandService {
     }
   }
 
-  private buildReplyChainMessageHistory(replyChain: Message[]) {
+  public buildReplyChainMessageHistory(replyChain: Message[]) {
     return replyChain.reverse().map((m) => {
       const memberId = m.member?.id;
 
@@ -84,12 +96,6 @@ export class ChitchatCommandService implements CommandService {
 
   private getCompletionResponseMessages(message: string) {
     return message.split('\n===\n');
-  }
-
-  private async getPromptMessageContext(message: Message) {
-    const replyChain = await this.discordService.fetchReplyChain(message);
-
-    return this.buildReplyChainMessageHistory(replyChain);
   }
 
   private async handleChitchatMessage(message: Message) {
@@ -126,8 +132,10 @@ export class ChitchatCommandService implements CommandService {
       const chatRequestMessage =
         this.createUserChatMessageFromDiscordMessage(message);
 
-      const replyChainMessageHistory = await this.getPromptMessageContext(
-        message,
+      const replyChain = await this.discordService.fetchReplyChain(message);
+
+      const replyChainMessageHistory = await this.buildReplyChainMessageHistory(
+        replyChain,
       );
 
       const userCompletionContent = replyChainMessageHistory
@@ -146,13 +154,39 @@ export class ChitchatCommandService implements CommandService {
 
       const channel = await message.channel.fetch();
 
+      const participantDetails = [
+        ...new Set([
+          ...replyChain.map((m) => m.member || m.author),
+          message.member || message.author,
+        ]),
+      ].map((author) =>
+        pick(author as unknown as Record<string, unknown>, [
+          'id',
+          'username',
+          'displayName',
+        ]),
+      );
+
       const messageChain = [
         this.aiCompletionService.createSystemMessage(this.preamble),
-        stripIndent`
-          NAME: ${this.discordService.username}
-          ID: ${this.discordService.userId}
-          CHANNEL INFO: ${channel.toJSON()}
-        `,
+        this.aiCompletionService.createSystemMessage(
+          stripIndent`
+            ASSISTANT USER DETAILS: ${JSON.stringify(
+              pick(
+                this.discordService.user as unknown as Record<string, unknown>,
+                ['id', 'name'],
+              ),
+            )}
+            CHANNEL DETAILS: ${JSON.stringify(
+              pick(channel as unknown as Record<string, unknown>, [
+                'id',
+                'name',
+                'type',
+              ]),
+            )}
+            PARTICIPANT DETAILS: ${JSON.stringify(participantDetails)}
+          `,
+        ),
         ...replyChainMessageHistory,
         chatRequestMessage,
         this.aiCompletionService.createSystemMessage(
@@ -166,13 +200,13 @@ export class ChitchatCommandService implements CommandService {
 
       const responseMessages = this.getCompletionResponseMessages(response);
 
-      return this.handleResponseMessages(message, responseMessages);
+      await this.handleResponseMessages(message, responseMessages);
     } catch (e) {
       if (e.response?.status === HttpStatus.TOO_MANY_REQUESTS) {
-        return message.reply('Out of credits... Please insert token.');
+        await message.reply('Out of credits... Please insert token.');
+      } else {
+        await message.reply('That one hurt my brain..');
       }
-
-      return message.reply('That one hurt my brain..');
     }
   }
 }
