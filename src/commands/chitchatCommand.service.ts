@@ -3,6 +3,7 @@ import { ConfigService } from '@nestjs/config';
 import { OnEvent } from '@nestjs/event-emitter';
 import { stripIndent } from 'common-tags';
 import { Message } from 'discord.js';
+import { concat } from 'rxjs';
 
 import { EnvironmentVariables } from '../config/validate';
 import { DISCORD_EVENTS } from '../discord/constants';
@@ -129,20 +130,11 @@ export class ChitchatCommandService implements CommandService {
         message,
       );
 
-      const messageChain = [
-        this.aiCompletionService.createSystemMessage(this.preamble),
-        this.aiCompletionService.createSystemMessage(stripIndent`
-          NAME: ${this.discordService.username}
-          ID: ${this.discordService.userId}
-          TODAY'S DATE: ${new Date().toISOString()}
-        `),
-        ...replyChainMessageHistory,
-        chatRequestMessage,
-      ];
-
-      const userCompletionContent = messageChain
+      const userCompletionContent = replyChainMessageHistory
         .filter((message) => message.role === 'user')
         .map((message) => message.content);
+
+      userCompletionContent.push(chatRequestMessage.content);
 
       const isValidUserContent = await this.openaiModeration.validateInput(
         userCompletionContent,
@@ -152,9 +144,26 @@ export class ChitchatCommandService implements CommandService {
         return message.reply('Uhhh... B&!');
       }
 
+      const channel = await message.channel.fetch();
+
+      const messageChain = [
+        this.aiCompletionService.createSystemMessage(this.preamble),
+        stripIndent`
+          NAME: ${this.discordService.username}
+          ID: ${this.discordService.userId}
+          CHANNEL INFO: ${channel.toJSON()}
+        `,
+        ...replyChainMessageHistory,
+        chatRequestMessage,
+        this.aiCompletionService.createSystemMessage(
+          'If completion is larger than 2000 characters it must be split into multiple messages <= 2000 characters in length using `\n===\n` as a delimiter.',
+        ),
+      ];
+
       const response = await this.aiCompletionService.getCompletion(
         messageChain,
       );
+
       const responseMessages = this.getCompletionResponseMessages(response);
 
       return this.handleResponseMessages(message, responseMessages);
