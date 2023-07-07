@@ -125,14 +125,6 @@ export class ChitchatCommandService implements CommandService {
       const chatRequestMessage =
         this.createUserChatMessageFromDiscordMessage(message);
 
-      const isValidContent = await this.openaiModeration.validateInput(
-        message.content,
-      );
-
-      if (!isValidContent) {
-        return message.reply('Uhhh... B&!');
-      }
-
       const replyChainMessageHistory = await this.getPromptMessageContext(
         message,
       );
@@ -147,6 +139,18 @@ export class ChitchatCommandService implements CommandService {
         ...replyChainMessageHistory,
         chatRequestMessage,
       ];
+
+      const userCompletionContent = messageChain
+        .filter((message) => message.role === 'user')
+        .map((message) => message.content);
+
+      const isValidUserContent = await this.openaiModeration.validateInput(
+        userCompletionContent,
+      );
+
+      if (!isValidUserContent) {
+        return message.reply('Uhhh... B&!');
+      }
 
       const response = await this.aiCompletionService.getCompletion(
         messageChain,
