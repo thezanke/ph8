@@ -190,7 +190,7 @@ export class ChitchatCommandService implements CommandService {
         ...replyChainMessageHistory,
         chatRequestMessage,
         this.aiCompletionService.createSystemMessage(
-          'If completion is larger than 2000 characters it must be split into multiple messages <= 2000 characters in length using `\n===\n` as a delimiter.',
+          'MESSAGES MUST BE SHORTER THAN 2000 CHARACTERS. USE `\n===\n` TO SPLIT RESPONSE INTO MULTIPLE MESSAGES SHORTER THAN 2000 CHARACTERS.',
         ),
       ];
 
