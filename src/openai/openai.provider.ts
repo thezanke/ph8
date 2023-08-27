@@ -2,7 +2,7 @@ import { ConfigService } from '@nestjs/config';
 import OpenAI from 'openai';
 import { EnvironmentVariables } from '../config/validate';
 
-export const openaiProvider = {
+export const OpenAIProvider = {
   provide: OpenAI,
   useFactory: (configService: ConfigService<EnvironmentVariables>) => {
     return new OpenAI({
