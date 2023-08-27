@@ -7,7 +7,6 @@ import { discordRestClientProvider } from './providers/discordRestClient.provide
 
 @Module({
   imports: [ConfigModule],
-  controllers: [],
   providers: [discordClientProvider, discordRestClientProvider, DiscordService],
   exports: [DiscordService],
 })
