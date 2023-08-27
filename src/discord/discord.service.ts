@@ -2,7 +2,6 @@ import { Inject, Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { Client, Message, MessageReaction, User } from 'discord.js';
-
 import { DISCORD_CLIENT } from './providers/discordClient.provider';
 import { DiscordEvent } from './types';
 

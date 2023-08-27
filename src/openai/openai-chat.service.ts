@@ -2,7 +2,6 @@ import { Inject, Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { stripIndent } from 'common-tags';
 import OpenAI from 'openai';
-
 import { AiCompletionService } from '../types/AiCompletionService.interface';
 
 const defaultRequestOptions: Partial<OpenAI.Chat.CompletionCreateParamsNonStreaming> &
