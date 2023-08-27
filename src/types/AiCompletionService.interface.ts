@@ -1,7 +1,7 @@
 export interface AiCompletionService<
   T = unknown,
   U = unknown,
-  V extends any[] = unknown[],
+  V extends unknown[] = unknown[],
 > {
   createUserMessage: (...args: V) => U | Promise<U>;
   createAssistantMessage: (...args: V) => U | Promise<U>;

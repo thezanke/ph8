@@ -1,23 +1,19 @@
 import { Inject, Injectable, Logger } from '@nestjs/common';
 import { stripIndent } from 'common-tags';
-import {
-  CreateModerationRequest,
-  CreateModerationRequestInput,
-  OpenAIApi,
-} from 'openai';
+import OpenAI from 'openai';
 
-const defaultRequestOptions: Partial<CreateModerationRequest> = {
+const defaultRequestOptions: Partial<OpenAI.ModerationCreateParams> = {
   model: 'text-moderation-latest',
 };
 
 @Injectable()
 export class OpenAIModerationService {
-  @Inject(OpenAIApi)
-  private readonly api: OpenAIApi;
+  @Inject(OpenAI)
+  private readonly openai: OpenAI;
   private readonly logger = new Logger(OpenAIModerationService.name);
 
-  public async validateInput(input: CreateModerationRequestInput) {
-    const moderationRequest: CreateModerationRequest = {
+  public async validateInput(input: OpenAI.ModerationCreateParams['input']) {
+    const moderationRequest: OpenAI.ModerationCreateParams = {
       ...defaultRequestOptions,
       input,
     };
@@ -27,15 +23,13 @@ export class OpenAIModerationService {
     );
 
     try {
-      const response = await this.api.createModeration(moderationRequest);
+      const response = await this.openai.moderations.create(moderationRequest);
 
-      const isValidContent = response.data.results.every(
+      const isValidContent = response.results.every(
         (result) => !result.flagged,
       );
 
-      this.logger.verbose(
-        `Moderation Response: ${JSON.stringify(response.data)}`,
-      );
+      this.logger.verbose(`Moderation Response: ${JSON.stringify(response)}`);
 
       return isValidContent;
     } catch (e) {

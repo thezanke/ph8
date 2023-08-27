@@ -1,17 +1,12 @@
 import { Inject, Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { stripIndent } from 'common-tags';
-import {
-  ChatCompletionRequestMessage,
-  ChatCompletionResponseMessage,
-  CreateChatCompletionRequest,
-  OpenAIApi,
-} from 'openai';
+import OpenAI from 'openai';
 
 import { AiCompletionService } from '../types/AiCompletionService.interface';
 
-const defaultRequestOptions: Partial<CreateChatCompletionRequest> &
-  Pick<CreateChatCompletionRequest, 'model'> = {
+const defaultRequestOptions: Partial<OpenAI.Chat.CompletionCreateParamsNonStreaming> &
+  Pick<OpenAI.Chat.CompletionCreateParams, 'model'> = {
   model: 'gpt-4',
   presence_penalty: 0.6,
   temperature: 0.9,
@@ -21,8 +16,8 @@ const defaultRequestOptions: Partial<CreateChatCompletionRequest> &
 export class OpenAIChatService implements AiCompletionService {
   constructor(private readonly configService: ConfigService) {}
 
-  @Inject(OpenAIApi)
-  private readonly api: OpenAIApi;
+  @Inject(OpenAI)
+  private readonly openai: OpenAI;
 
   private readonly logger = new Logger(OpenAIChatService.name);
 
@@ -36,55 +31,56 @@ export class OpenAIChatService implements AiCompletionService {
     defaultRequestOptions.model,
   );
 
-  private createCompletionMessage = (
-    role: ChatCompletionRequestMessage['role'],
-    content: ChatCompletionRequestMessage['content'],
-    name?: ChatCompletionRequestMessage['name'],
-  ): ChatCompletionRequestMessage => {
+  private createCompletionRequestMessage = (
+    role: OpenAI.Chat.CreateChatCompletionRequestMessage['role'],
+    content: OpenAI.Chat.CreateChatCompletionRequestMessage['content'],
+    name?: OpenAI.Chat.CreateChatCompletionRequestMessage['name'],
+  ): OpenAI.Chat.CreateChatCompletionRequestMessage => {
     return { role, content, name };
   };
 
   public createAssistantMessage = (
-    content: ChatCompletionResponseMessage['content'],
+    content: OpenAI.Chat.CreateChatCompletionRequestMessage['content'],
   ) => {
-    return this.createCompletionMessage('assistant', content);
+    return this.createCompletionRequestMessage('assistant', content);
   };
 
   public createSystemMessage = (
-    content: ChatCompletionRequestMessage['content'],
+    content: OpenAI.Chat.CreateChatCompletionRequestMessage['content'],
   ) => {
-    return this.createCompletionMessage('system', content);
+    return this.createCompletionRequestMessage('system', content);
   };
 
   public createUserMessage = (
-    content: ChatCompletionRequestMessage['content'],
-    name?: ChatCompletionRequestMessage['name'],
+    content: OpenAI.Chat.CreateChatCompletionRequestMessage['content'],
+    name?: OpenAI.Chat.CreateChatCompletionRequestMessage['name'],
   ) => {
-    return this.createCompletionMessage('user', content, name);
+    return this.createCompletionRequestMessage('user', content, name);
   };
 
-  public async getCompletion(messages: ChatCompletionRequestMessage[]) {
-    const chatCompletionRequest: CreateChatCompletionRequest = {
-      ...defaultRequestOptions,
-      model: this.gptChitchatModel,
-      max_tokens: this.gptChitchatMaxTokens,
-      messages,
-    };
+  public async getCompletion(
+    messages: OpenAI.Chat.CreateChatCompletionRequestMessage[],
+  ) {
+    const chatCompletionRequest: OpenAI.Chat.CompletionCreateParamsNonStreaming =
+      {
+        ...defaultRequestOptions,
+        model: this.gptChitchatModel,
+        max_tokens: this.gptChitchatMaxTokens,
+        messages,
+      };
 
     this.logger.verbose(
       `Requesting Completion: ${JSON.stringify(chatCompletionRequest)}`,
     );
 
     try {
-      const response = await this.api.createChatCompletion(
+      const response = await this.openai.chat.completions.create(
         chatCompletionRequest,
       );
 
-      const { data } = response;
+      this.logger.verbose(`Completion Result: ${JSON.stringify(response)}`);
 
-      this.logger.verbose(`Completion Result: ${JSON.stringify(data)}`);
-
-      const [choice] = data.choices;
+      const [choice] = response.choices;
       const choiceMessageContent = choice.message?.content;
 
       if (!choiceMessageContent) {

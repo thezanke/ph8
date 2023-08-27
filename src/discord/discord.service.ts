@@ -1,10 +1,10 @@
 import { Inject, Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 import { Client, Message, MessageReaction, User } from 'discord.js';
-import { EventEmitter2 } from 'eventemitter2';
 
-import { DISCORD_EVENTS } from './constants';
 import { DISCORD_CLIENT } from './providers/discordClient.provider';
+import { DiscordEvent } from './types';
 
 @Injectable()
 export class DiscordService {
@@ -62,21 +62,21 @@ export class DiscordService {
 
   private handleMessageCreate = async (message: Message) => {
     if (this.determineIfOwnMessage(message)) return;
-    this.eventEmitter.emit(DISCORD_EVENTS.messageCreate, message);
+    this.eventEmitter.emit(DiscordEvent.messageCreated, message);
   };
 
   private handleMessageReactionAdd = async (
     reaction: MessageReaction,
     user: User,
   ) => {
-    this.eventEmitter.emit(DISCORD_EVENTS.reactionAdded, reaction, user);
+    this.eventEmitter.emit(DiscordEvent.reactionAdded, reaction, user);
   };
 
   private handleMessageReactionRemove = async (
     reaction: MessageReaction,
     user: User,
   ) => {
-    this.eventEmitter.emit(DISCORD_EVENTS.reactionRemoved, reaction, user);
+    this.eventEmitter.emit(DiscordEvent.reactionRemoved, reaction, user);
   };
 
   private handleReady = () => {

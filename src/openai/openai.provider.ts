@@ -1,16 +1,14 @@
 import { ConfigService } from '@nestjs/config';
-import { Configuration, OpenAIApi } from 'openai';
+import OpenAI from 'openai';
 
 import { EnvironmentVariables } from '../config/validate';
 
 export const openaiProvider = {
-  provide: OpenAIApi,
+  provide: OpenAI,
   useFactory: (configService: ConfigService<EnvironmentVariables>) => {
-    const configuration = new Configuration({
+    return new OpenAI({
       apiKey: configService.get('GPT_API_SECRET'),
     });
-
-    return new OpenAIApi(configuration);
   },
   inject: [ConfigService],
 };
