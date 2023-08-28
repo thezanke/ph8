@@ -44,12 +44,17 @@ export class DiscordService {
   }
 
   public async fetchReplyChain(message: Message): Promise<Message[]> {
+    let currentMessage = message;
     const replyChain: Message[] = [];
-    let m = message;
 
-    while (m.reference && replyChain.length < this.replyChainLimit) {
-      m = await m.fetchReference();
-      replyChain.push(m);
+    while (currentMessage.reference?.messageId) {
+      const referencedMessage = await message.channel.messages.fetch(
+        currentMessage.reference.messageId,
+      );
+
+      replyChain.push(referencedMessage);
+
+      currentMessage = referencedMessage;
     }
 
     return replyChain;

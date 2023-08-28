@@ -1,8 +1,10 @@
-import { Inject, Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { stripIndent } from 'common-tags';
 import OpenAI from 'openai';
+import { filterMap } from '../helpers/filterMap';
 import { AiCompletionService } from '../types/AiCompletionService.interface';
+import { OpenAIModerationService } from './openai-moderation.service';
 
 const defaultRequestOptions: Partial<OpenAI.Chat.CompletionCreateParamsNonStreaming> &
   Pick<OpenAI.Chat.CompletionCreateParams, 'model'> = {
@@ -13,10 +15,11 @@ const defaultRequestOptions: Partial<OpenAI.Chat.CompletionCreateParamsNonStream
 
 @Injectable()
 export class OpenAIChatService implements AiCompletionService {
-  constructor(private readonly configService: ConfigService) {}
-
-  @Inject(OpenAI)
-  private readonly openai: OpenAI;
+  constructor(
+    private readonly configService: ConfigService,
+    private readonly moderationService: OpenAIModerationService,
+    private readonly openai: OpenAI,
+  ) {}
 
   private readonly logger = new Logger(OpenAIChatService.name);
 
@@ -60,6 +63,20 @@ export class OpenAIChatService implements AiCompletionService {
   public async getCompletion(
     messages: OpenAI.Chat.CreateChatCompletionRequestMessage[],
   ) {
+    const isValidContent = await this.moderationService.validateInput(
+      filterMap(
+        messages,
+        (message) => !!message.content,
+        (message) => message.content as string,
+      ),
+    );
+
+    if (!isValidContent) {
+      this.logger.verbose('Failed moderation; sending fallback response.');
+
+      return 'uh, b&.';
+    }
+
     const chatCompletionRequest: OpenAI.Chat.CompletionCreateParamsNonStreaming =
       {
         ...defaultRequestOptions,

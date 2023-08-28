@@ -1,4 +1,4 @@
-import { Inject, Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { stripIndent } from 'common-tags';
 import OpenAI from 'openai';
 
@@ -8,8 +8,8 @@ const defaultRequestOptions: Partial<OpenAI.ModerationCreateParams> = {
 
 @Injectable()
 export class OpenAIModerationService {
-  @Inject(OpenAI)
-  private readonly openai: OpenAI;
+  constructor(private readonly openai: OpenAI) {}
+
   private readonly logger = new Logger(OpenAIModerationService.name);
 
   public async validateInput(input: OpenAI.ModerationCreateParams['input']) {
