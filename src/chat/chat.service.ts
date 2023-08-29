@@ -36,7 +36,6 @@ export class ChatService {
     openAIMessages.reverse();
 
     const response = await this.openAIChatService.getCompletion(openAIMessages);
-
     await initialMessage.reply(response);
   }
 }
