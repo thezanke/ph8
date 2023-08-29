@@ -3,7 +3,6 @@ import { ConfigService } from '@nestjs/config';
 import { stripIndent } from 'common-tags';
 import OpenAI from 'openai';
 import { filterMap } from '../helpers/filterMap';
-import { AiCompletionService } from '../types/AiCompletionService.interface';
 import { OpenAIModerationService } from './openai-moderation.service';
 
 const defaultRequestOptions: Partial<OpenAI.Chat.CompletionCreateParamsNonStreaming> &
@@ -14,7 +13,7 @@ const defaultRequestOptions: Partial<OpenAI.Chat.CompletionCreateParamsNonStream
 };
 
 @Injectable()
-export class OpenAIChatService implements AiCompletionService {
+export class OpenAIChatService {
   constructor(
     private readonly configService: ConfigService,
     private readonly moderationService: OpenAIModerationService,
@@ -32,33 +31,6 @@ export class OpenAIChatService implements AiCompletionService {
     'GPT_CHITCHAT_MODEL',
     defaultRequestOptions.model,
   );
-
-  private createCompletionRequestMessage = (
-    role: OpenAI.Chat.CreateChatCompletionRequestMessage['role'],
-    content: OpenAI.Chat.CreateChatCompletionRequestMessage['content'],
-    name?: OpenAI.Chat.CreateChatCompletionRequestMessage['name'],
-  ): OpenAI.Chat.CreateChatCompletionRequestMessage => {
-    return { role, content, name };
-  };
-
-  public createAssistantMessage = (
-    content: OpenAI.Chat.CreateChatCompletionRequestMessage['content'],
-  ) => {
-    return this.createCompletionRequestMessage('assistant', content);
-  };
-
-  public createSystemMessage = (
-    content: OpenAI.Chat.CreateChatCompletionRequestMessage['content'],
-  ) => {
-    return this.createCompletionRequestMessage('system', content);
-  };
-
-  public createUserMessage = (
-    content: OpenAI.Chat.CreateChatCompletionRequestMessage['content'],
-    name?: OpenAI.Chat.CreateChatCompletionRequestMessage['name'],
-  ) => {
-    return this.createCompletionRequestMessage('user', content, name);
-  };
 
   public async getCompletion(
     messages: OpenAI.Chat.CreateChatCompletionRequestMessage[],

@@ -1,8 +1,11 @@
 import { Injectable } from '@nestjs/common';
 import { OnEvent } from '@nestjs/event-emitter';
 import { Message } from 'discord.js';
+import { CreateChatCompletionRequestMessage } from 'openai/resources/chat';
 import { DiscordService } from '../discord/discord.service';
 import { DiscordEvent } from '../discord/types';
+
+import { createUserMessage } from '../openai/helpers/createUserMessage';
 import { OpenAIChatService } from '../openai/openai-chat.service';
 
 @Injectable()
@@ -14,22 +17,26 @@ export class ChatService {
 
   @OnEvent(DiscordEvent.messageCreated)
   async handleDiscordMessageCreated(message: Message) {
-    const chain = await this.discordService.fetchReplyChain(message);
-    chain.push(message);
-
-    console.log(chain.length);
-
-    const response = await this.openAIChatService.getCompletion(
-      chain.map(this.convertDiscordMessageToOpenAIInput),
-    );
-
-    await message.channel.send(response);
+    if (this.discordService.determineIfMentioned(message)) {
+      await this.handleMention(message);
+    }
   }
 
-  private convertDiscordMessageToOpenAIInput = (message: Message) => {
-    return this.openAIChatService.createUserMessage(
-      message.content,
-      message.author.username,
-    );
-  };
+  private async handleMention(initialMessage: Message) {
+    const messages: CreateChatCompletionRequestMessage[] = [];
+
+    for await (const message of this.discordService.traverseMessageChain(
+      initialMessage,
+    )) {
+      messages.push(
+        createUserMessage(message.content, message.author.username),
+      );
+    }
+
+    messages.reverse();
+
+    const response = await this.openAIChatService.getCompletion(messages);
+
+    await initialMessage.reply(response);
+  }
 }

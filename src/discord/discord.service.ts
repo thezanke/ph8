@@ -1,7 +1,14 @@
 import { Inject, Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { EventEmitter2 } from '@nestjs/event-emitter';
-import { Client, Message, MessageReaction, User } from 'discord.js';
+import {
+  Client,
+  Message,
+  MessageReaction,
+  PartialMessageReaction,
+  PartialUser,
+  User,
+} from 'discord.js';
 import { DISCORD_CLIENT } from './providers/discordClient.provider';
 import { DiscordEvent } from './types';
 
@@ -32,7 +39,7 @@ export class DiscordService {
   }
 
   public get userId() {
-    return this.discordClient.user?.id;
+    return this.discordClient.user?.id ?? 'ph8';
   }
 
   public get username() {
@@ -43,21 +50,26 @@ export class DiscordService {
     return this.discordClient.user;
   }
 
-  public async fetchReplyChain(message: Message): Promise<Message[]> {
-    let currentMessage = message;
-    const replyChain: Message[] = [];
+  public async *traverseMessageChain(
+    message: Message,
+  ): AsyncGenerator<Message> {
+    yield message;
 
-    while (currentMessage.reference?.messageId) {
+    let lastMessage = message;
+
+    while (lastMessage.reference?.messageId) {
       const referencedMessage = await message.channel.messages.fetch(
-        currentMessage.reference.messageId,
+        lastMessage.reference.messageId,
       );
 
-      replyChain.push(referencedMessage);
+      yield referencedMessage;
 
-      currentMessage = referencedMessage;
+      lastMessage = referencedMessage;
     }
+  }
 
-    return replyChain;
+  public determineIfMentioned(message: Message) {
+    return message.mentions.users.has(this.userId);
   }
 
   private determineIfOwnMessage(message: Message) {
@@ -70,15 +82,15 @@ export class DiscordService {
   };
 
   private handleMessageReactionAdd = async (
-    reaction: MessageReaction,
-    user: User,
+    reaction: MessageReaction | PartialMessageReaction,
+    user: User | PartialUser,
   ) => {
     this.eventEmitter.emit(DiscordEvent.reactionAdded, reaction, user);
   };
 
   private handleMessageReactionRemove = async (
-    reaction: MessageReaction,
-    user: User,
+    reaction: MessageReaction | PartialMessageReaction,
+    user: User | PartialUser,
   ) => {
     this.eventEmitter.emit(DiscordEvent.reactionRemoved, reaction, user);
   };
