@@ -33,15 +33,17 @@ export class OpenAIModerationService {
 
       return isValidContent;
     } catch (e) {
-      if (e.response) {
+      if (e instanceof OpenAI.APIError) {
         this.logger.error(stripIndent`
           Moderation Error Response:
-            Status: ${e.response.status}
-            Data: ${JSON.stringify(e.response.data)}
+            Status: ${e.status}
+            Message: ${JSON.stringify(e.message)}
         `);
-      } else {
-        this.logger.error(`Moderation Error: ${e.message}`);
+
+        return;
       }
+
+      this.logger.error(`Moderation Error: ${(e as Error).message}`);
 
       throw e;
     }

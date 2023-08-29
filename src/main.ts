@@ -13,9 +13,11 @@ async function bootstrap() {
   const logLevels = parseEnvStringList(
     configService.get('LOG_LEVELS', ''),
   ) as LogLevel[];
+
   app.useLogger(logLevels);
 
   const port = configService.get('HTTP_PORT');
+
   await app.listen(port);
 }
 

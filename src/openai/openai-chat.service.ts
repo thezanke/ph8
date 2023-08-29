@@ -77,13 +77,13 @@ export class OpenAIChatService {
 
       return choiceMessageContent;
     } catch (e) {
-      if (e.response) {
+      if (e instanceof OpenAI.APIError) {
         this.logger.error(stripIndent`
           Chat Completion Error Response:
-            Status: ${e.response.status}
-            Data: ${JSON.stringify(e.response.data)}
+            Status: ${e.status}
+            Message: ${JSON.stringify(e.message)}
         `);
-      } else {
+      } else if (e instanceof Error) {
         this.logger.error(`Chat Completion Error: ${e.message}`);
       }
 

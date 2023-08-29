@@ -50,7 +50,7 @@ export class DiscordService {
     return this.discordClient.user;
   }
 
-  public async *traverseMessageChain(
+  public async *messageChainGenerator(
     message: Message,
   ): AsyncGenerator<Message> {
     yield message;

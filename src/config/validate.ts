@@ -16,32 +16,32 @@ enum Environment {
 
 export class EnvironmentVariables {
   @IsString()
-  DISCORD_BOT_TOKEN: string;
+  DISCORD_BOT_TOKEN!: string;
 
   @IsNumber()
-  HTTP_PORT: number;
+  HTTP_PORT!: number;
 
   @IsString()
-  LOG_LEVELS: string;
+  LOG_LEVELS!: string;
 
   @IsEnum(Environment)
-  NODE_ENV: Environment;
+  NODE_ENV!: Environment;
 
   @IsString()
-  POOR_SOURCES: string;
+  POOR_SOURCES!: string;
 
   @IsString()
-  POOR_SOURCE_REPLIES: string;
+  POOR_SOURCE_REPLIES!: string;
 
   @IsString()
-  SCORES_JSON_FILE_PATH: string;
+  SCORES_JSON_FILE_PATH!: string;
 
   @IsString()
-  GOOGLE_API_KEY: string;
+  GOOGLE_API_KEY!: string;
 
   @Transform(({ value }) => value.toLowerCase() === 'true')
   @IsBoolean()
-  ENABLE_GPT: string;
+  ENABLE_GPT!: string;
 
   @IsString()
   @IsOptional()
@@ -52,7 +52,7 @@ export class EnvironmentVariables {
   GPT_API_BASE_URL?: string;
 
   @IsString()
-  GPT_CHITCHAT_SYSTEM_MESSAGE_PREAMBLE: string;
+  GPT_CHITCHAT_SYSTEM_MESSAGE_PREAMBLE!: string;
 
   @IsString()
   @IsOptional()
