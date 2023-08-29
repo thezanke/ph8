@@ -21,18 +21,21 @@ export class ChatService {
   }
 
   private async handleMention(initialMessage: Message) {
-    const messages: CreateChatCompletionRequestMessage[] = [];
-    const chain = this.discordService.messageChainGenerator(initialMessage);
+    const discordMessages =
+      this.discordService.messageChainGenerator(initialMessage);
 
-    for await (const message of chain) {
-      messages.push(
+    const openAIMessages: CreateChatCompletionRequestMessage[] = [];
+
+    for await (const message of discordMessages) {
+      openAIMessages.push(
         createUserMessage(message.content, message.author.username),
       );
     }
 
-    messages.reverse();
+    // faster to reverse at the end than to unshift
+    openAIMessages.reverse();
 
-    const response = await this.openAIChatService.getCompletion(messages);
+    const response = await this.openAIChatService.getCompletion(openAIMessages);
 
     await initialMessage.reply(response);
   }
