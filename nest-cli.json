@@ -1,8 +1,32 @@
 {
   "$schema": "https://json.schemastore.org/nest-cli",
   "collection": "@nestjs/schematics",
-  "sourceRoot": "src",
+  "sourceRoot": "apps/ph8/src",
   "compilerOptions": {
-    "deleteOutDir": true
+    "deleteOutDir": true,
+    "webpack": true,
+    "tsConfigPath": "apps/ph8/tsconfig.app.json"
+  },
+  "monorepo": true,
+  "root": "apps/ph8",
+  "projects": {
+    "discord": {
+      "type": "application",
+      "root": "apps/discord",
+      "entryFile": "main",
+      "sourceRoot": "apps/discord/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/discord/tsconfig.app.json"
+      }
+    },
+    "ph8": {
+      "type": "application",
+      "root": "apps/ph8",
+      "entryFile": "main",
+      "sourceRoot": "apps/ph8/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/ph8/tsconfig.app.json"
+      }
+    }
   }
 }
