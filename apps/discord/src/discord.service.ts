@@ -1,10 +1,16 @@
 import { Injectable } from '@nestjs/common';
-import { Message } from 'discord.js';
+import { Context, ContextOf, On } from 'necord';
 
 @Injectable()
 export class DiscordService {
-  async handleMessage(message: Message) {
-    console.log(message);
-    return 'hello';
+  @On('messageCreate')
+  public async onMessageCreate(
+    @Context() [message]: ContextOf<'messageCreate'>,
+  ) {
+    if (message.author.bot) return;
+
+    console.log(message.content);
+
+    await message.react('🤣');
   }
 }
