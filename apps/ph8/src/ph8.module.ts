@@ -8,6 +8,7 @@ import {
 import { Ph8Controller } from './ph8.controller';
 import { Ph8Service } from './ph8.service';
 import { ConfigModule } from '@nestjs/config';
+import { OpenaiService } from './openai/openai.service';
 
 @Module({
   imports: [
@@ -17,7 +18,7 @@ import { ConfigModule } from '@nestjs/config';
     ]),
   ],
   controllers: [Ph8Controller],
-  providers: [Ph8Service],
+  providers: [Ph8Service, OpenaiService],
 })
 export class Ph8Module implements OnModuleInit {
   constructor(
