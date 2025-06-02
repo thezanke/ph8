@@ -1,11 +1,11 @@
 import { Inject, Injectable } from '@nestjs/common';
 import OpenAI from 'openai';
-import { OpenaiService } from './openai/openai.service';
+import { OpenAIService } from './openai/openai.service';
 
 @Injectable()
 export class Ph8Service {
   @Inject()
-  private readonly openaiService: OpenaiService
+  private readonly openaiService: OpenAIService
 
   getHello() {
     return this.openaiService.createChatCompletion({

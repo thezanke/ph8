@@ -3,8 +3,8 @@ import OpenAI from 'openai';
 import { ChatCompletionCreateParamsNonStreaming } from 'openai/resources/index';
 
 @Injectable()
-export class OpenaiService {
-  client = new OpenAI();
+export class OpenAIService {
+  private readonly client = new OpenAI();
 
   async createChatCompletion(body: ChatCompletionCreateParamsNonStreaming) {
     const res = await this.client.chat.completions.create(body);
