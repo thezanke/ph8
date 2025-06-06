@@ -9,7 +9,7 @@ async function bootstrap() {
 
   app.connectMicroservice({
     transport: Transport.TCP,
-    options: { port: config.get<string>('TCP_PH8_PORT', '1111') },
+    options: { port: config.get<number>('TCP_PH8_PORT', 1111) },
   });
 
   await app.startAllMicroservices();

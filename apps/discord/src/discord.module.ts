@@ -4,10 +4,24 @@ import { IntentsBitField, Partials } from 'discord.js';
 import { NecordModule } from 'necord';
 import { DiscordController } from './discord.controller';
 import { DiscordService } from './discord.service';
+import { ClientsModule, Transport } from '@nestjs/microservices';
 
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
+    ClientsModule.registerAsync([
+      {
+        name: 'PH8_SERVICE',
+        imports: [ConfigModule],
+        useFactory: (config: ConfigService) => ({
+          transport: Transport.TCP,
+          options: {
+            port: config.get<number>('TCP_PH8_PORT', 1111),
+          },
+        }),
+        inject: [ConfigService],
+      },
+    ]),
     NecordModule.forRootAsync({
       imports: [ConfigModule],
       useFactory: (config: ConfigService) => ({

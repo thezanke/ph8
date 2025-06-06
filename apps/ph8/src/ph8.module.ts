@@ -1,20 +1,30 @@
 import { Inject, Module, OnModuleInit } from '@nestjs/common';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import {
   ClientProxy,
   ClientsModule,
   TcpStatus,
   Transport,
 } from '@nestjs/microservices';
+import { OpenAIService } from './openai/openai.service';
 import { Ph8Controller } from './ph8.controller';
 import { Ph8Service } from './ph8.service';
-import { ConfigModule } from '@nestjs/config';
-import { OpenAIService } from './openai/openai.service';
 
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
-    ClientsModule.register([
-      { name: 'DISCORD_SERVICE', transport: Transport.TCP },
+    ClientsModule.registerAsync([
+      {
+        name: 'DISCORD_SERVICE',
+        imports: [ConfigModule],
+        useFactory: (config: ConfigService) => ({
+          transport: Transport.TCP,
+          options: {
+            port: config.get<number>('DISCORD_PORT', 9999),
+          },
+        }),
+        inject: [ConfigService],
+      },
     ]),
   ],
   controllers: [Ph8Controller],

@@ -9,7 +9,7 @@ async function bootstrap() {
 
   app.connectMicroservice({
     transport: Transport.TCP,
-    options: { port: config.get<string>('TCP_DISCORD_PORT', '2222') },
+    options: { port: config.get<number>('TCP_DISCORD_PORT', 2222) },
   });
 
   await app.startAllMicroservices();

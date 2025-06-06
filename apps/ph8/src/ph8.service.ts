@@ -1,18 +1,23 @@
 import { Inject, Injectable } from '@nestjs/common';
-import OpenAI from 'openai';
 import { OpenAIService } from './openai/openai.service';
 
 @Injectable()
 export class Ph8Service {
   @Inject()
-  private readonly openaiService: OpenAIService
+  private readonly openaiService: OpenAIService;
 
-  getHello() {
+  chat(content: string) {
     return this.openaiService.createChatCompletion({
       model: 'gpt-4.1-mini',
-      messages: [{ role: 'user', content: 'Hello, world!' }],
-      max_tokens: 50,
-      temperature: 0.7,
+      messages: [
+        {
+          role: 'system',
+          content:
+            'given a chat history, respond to the most recent message succinctly',
+        },
+        { role: 'user', content },
+      ],
+      temperature: 0.8,
     });
   }
 }
