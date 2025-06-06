@@ -1,10 +1,12 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable, Logger } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
 import { Context, ContextOf, On } from 'necord';
 import { firstValueFrom } from 'rxjs';
 
 @Injectable()
 export class DiscordService {
+  private readonly logger = new Logger(DiscordService.name);
+
   @Inject('PH8_SERVICE')
   private readonly ph8: ClientProxy;
 
@@ -15,27 +17,31 @@ export class DiscordService {
     if (message.author.bot) return;
 
     let log = '';
+    let isDM = false;
     if (message.guild) {
       log += `[${message.guild.name}]`;
     }
 
     if ('name' in message.channel) {
-      log += `[#${message.channel.name}]`;
+      log += `[#${message.channel.name}] `;
     } else {
-      log += `[DM]`;
+      isDM = true;
+      log += `[DM]\n`;
     }
 
-    if (log) log += ' ';
+    log += `${message.author.displayName}: ${message.content}`;
 
-    log += `@${message.author.displayName}: ${message.content}`;
+    if (isDM) {
+      const response = await firstValueFrom(
+        this.ph8.send<string>({ cmd: 'chat' }, message.content),
+      );
 
-    const response = await firstValueFrom(
-      this.ph8.send<string>({ cmd: 'chat' }, message.content),
-    );
-
-    if (response) {
-      log += `\n> ${response}`;
-      await message.reply(response);
+      if (response) {
+        log += `\nph8: ${response}`;
+        await message.reply(response);
+      }
     }
+
+    this.logger.verbose(log);
   }
 }
