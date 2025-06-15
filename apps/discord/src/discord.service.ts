@@ -1,5 +1,6 @@
 import { Inject, Injectable, Logger } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
+import { Client } from 'discord.js';
 import { Context, ContextOf, On } from 'necord';
 import { firstValueFrom } from 'rxjs';
 
@@ -10,6 +11,9 @@ export class DiscordService {
   @Inject('PH8_SERVICE')
   private readonly ph8: ClientProxy;
 
+  @Inject(Client)
+  private readonly client: Client;
+
   @On('messageCreate')
   public async onMessageCreate(
     @Context() [message]: ContextOf<'messageCreate'>,
@@ -18,6 +22,13 @@ export class DiscordService {
 
     let log = '';
     let isDM = false;
+
+    const isMention =
+      this.client.user && message.mentions.has(this.client.user);
+
+    const isReply =
+      message.reference && (await message.fetchReference()).author.bot;
+
     if (message.guild) {
       log += `[${message.guild.name}]`;
     }
@@ -31,17 +42,21 @@ export class DiscordService {
 
     log += `${message.author.displayName}: ${message.content}`;
 
-    if (isDM) {
-      const response = await firstValueFrom(
-        this.ph8.send<string>({ cmd: 'chat' }, message.content),
-      );
+    let response: string | null = null;
 
-      if (response) {
-        log += `\nph8: ${response}`;
-        await message.reply(response);
-      }
+    if (isDM || isMention || isReply) {
+      response = await this.getResponse([message.content]);
+    }
+
+    if (response) {
+      log += `\nph8: ${response}`;
+      await message.reply(response);
     }
 
     this.logger.verbose(log);
+  }
+
+  getResponse(messages: string[]) {
+    return firstValueFrom(this.ph8.send<string>({ cmd: 'chat' }, messages));
   }
 }

@@ -6,7 +6,7 @@ export class Ph8Service {
   @Inject()
   private readonly openaiService: OpenAIService;
 
-  chat(content: string) {
+  chat(messages: string[]) {
     return this.openaiService.createChatCompletion({
       model: 'gpt-4.1-mini',
       messages: [
@@ -15,7 +15,13 @@ export class Ph8Service {
           content:
             'given a chat history, respond to the most recent message succinctly',
         },
-        { role: 'user', content },
+        ...messages.map(
+          (content) =>
+            ({ role: 'user', content }) as {
+              role: 'user';
+              content: string;
+            },
+        ),
       ],
       temperature: 0.8,
     });

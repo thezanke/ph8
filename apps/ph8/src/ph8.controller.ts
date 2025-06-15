@@ -8,11 +8,11 @@ export class Ph8Controller {
 
   @Get('health')
   getHello() {
-    return this.appService.chat('health check successful message');
+    return this.appService.chat(['health check successful message']);
   }
 
   @MessagePattern({ cmd: 'chat' })
-  async chat(message: string): Promise<string> {
-    return this.appService.chat(message);
+  async chat(messages: string[]): Promise<string> {
+    return this.appService.chat(messages);
   }
 }
